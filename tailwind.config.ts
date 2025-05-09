@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -31,6 +32,14 @@ export default {
 				secondary: {
 					DEFAULT: 'hsl(var(--secondary))',
 					foreground: 'hsl(var(--secondary-foreground))'
+				},
+				success: {
+					DEFAULT: 'hsl(var(--success))',
+					foreground: 'hsl(var(--success-foreground))'
+				},
+				warning: {
+					DEFAULT: 'hsl(var(--warning))',
+					foreground: 'hsl(var(--warning-foreground))'
 				},
 				destructive: {
 					DEFAULT: 'hsl(var(--destructive))',
@@ -84,11 +93,26 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-beacon': {
+					'0%': {
+						transform: 'scale(0.95)',
+						boxShadow: '0 0 0 0 rgba(0, 123, 255, 0.7)'
+					},
+					'70%': {
+						transform: 'scale(1)',
+						boxShadow: '0 0 0 10px rgba(0, 123, 255, 0)'
+					},
+					'100%': {
+						transform: 'scale(0.95)',
+						boxShadow: '0 0 0 0 rgba(0, 123, 255, 0)'
+					}
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-beacon': 'pulse-beacon 2s infinite'
 			}
 		}
 	},
