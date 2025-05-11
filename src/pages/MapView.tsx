@@ -5,14 +5,108 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { MapPin } from "lucide-react";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 import LocationTracker from "@/components/LocationTracker";
+import LeafletMap, { MapMarker } from "@/components/LeafletMap";
+
+// Mock data for reports (in a real app, this would come from an API)
+const mockReports = [
+  {
+    id: "1",
+    type: "Buraco na via",
+    address: "Rua das Flores, 123 - Centro",
+    position: [-23.55052, -46.633308] as [number, number],
+    status: "pending",
+    date: "2023-05-08T10:30:00"
+  },
+  {
+    id: "2",
+    type: "Árvore caída",
+    address: "Av. Principal, 456 - Jardim",
+    position: [-23.54550, -46.638100] as [number, number],
+    status: "in_progress",
+    date: "2023-05-07T08:45:00"
+  },
+  {
+    id: "3",
+    type: "Lâmpada queimada",
+    address: "Praça Central",
+    position: [-23.56052, -46.629708] as [number, number],
+    status: "resolved",
+    date: "2023-05-06T16:20:00"
+  },
+  {
+    id: "4",
+    type: "Lixo acumulado",
+    address: "Rua Lateral, 789 - Vila Nova",
+    position: [-23.55552, -46.641308] as [number, number],
+    status: "pending",
+    date: "2023-05-05T11:15:00"
+  },
+  {
+    id: "5",
+    type: "Buraco na via",
+    address: "Av. Secundária, 321 - Bairro Sul",
+    position: [-23.54852, -46.623308] as [number, number],
+    status: "in_progress",
+    date: "2023-05-04T09:30:00"
+  },
+];
 
 const MapView = () => {
   const [filter, setFilter] = useState("all");
-  
-  // In a real application, this would load an actual map using a library like Leaflet or Google Maps
-  // For the purpose of this demo, we'll just display a mock map interface
+  const [markers, setMarkers] = useState<MapMarker[]>([]);
+  const navigate = useNavigate();
+  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+
+  // Filter reports based on selected filter
+  useEffect(() => {
+    let filteredReports = [...mockReports];
+    
+    if (filter !== "all") {
+      if (["pending", "in_progress", "resolved"].includes(filter)) {
+        filteredReports = mockReports.filter(report => report.status === filter);
+      } else {
+        // Filter by type of issue
+        filteredReports = mockReports.filter(report => 
+          report.type.toLowerCase().includes(filter.toLowerCase())
+        );
+      }
+    }
+    
+    // Convert reports to map markers
+    const newMarkers: MapMarker[] = filteredReports.map(report => ({
+      id: report.id,
+      position: report.position,
+      title: report.address,
+      status: report.status as any,
+      type: report.type
+    }));
+    
+    setMarkers(newMarkers);
+  }, [filter]);
+
+  // Get user location once
+  useEffect(() => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation([latitude, longitude]);
+        },
+        (error) => {
+          console.error("Erro ao obter localização:", error);
+          toast.error("Não foi possível obter sua localização");
+        }
+      );
+    }
+  }, []);
+
+  // Handle marker click to navigate to report detail
+  const handleMarkerClick = (marker: MapMarker) => {
+    navigate(`/report/${marker.id}`);
+  };
   
   return (
     <Layout>
@@ -38,9 +132,9 @@ const MapView = () => {
                   <SelectItem value="pending">Pendentes</SelectItem>
                   <SelectItem value="in_progress">Em andamento</SelectItem>
                   <SelectItem value="resolved">Resolvidas</SelectItem>
-                  <SelectItem value="potholes">Buracos na via</SelectItem>
-                  <SelectItem value="trees">Poda de árvores</SelectItem>
-                  <SelectItem value="lights">Lâmpadas queimadas</SelectItem>
+                  <SelectItem value="buracos">Buracos na via</SelectItem>
+                  <SelectItem value="árvore">Poda de árvores</SelectItem>
+                  <SelectItem value="lâmpada">Lâmpadas queimadas</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -49,44 +143,30 @@ const MapView = () => {
 
         <Card>
           <CardContent className="p-0">
-            <div className="relative w-full h-[70vh] bg-gray-200">
-              {/* Mock Map Interface */}
-              <div className="absolute inset-0 bg-gray-200 flex items-center justify-center">
-                <div className="text-center">
-                  <MapPin className="h-16 w-16 text-primary mx-auto" />
-                  <p className="mt-4 text-gray-600">
-                    Aqui será exibido o mapa com todas as ocorrências.
-                  </p>
-                  <p className="text-sm text-gray-500">
-                    Em uma implementação real, utilizaríamos uma biblioteca de mapas como Leaflet ou Google Maps.
-                  </p>
-                </div>
-              </div>
+            <div className="relative w-full h-[70vh]">
+              <LeafletMap 
+                markers={markers} 
+                showUserLocation={true}
+                center={userLocation || [-23.55052, -46.633308]}
+                zoom={13}
+                height="70vh"
+                onMarkerClick={handleMarkerClick}
+              />
               
-              {/* Map Controls (Sample) */}
-              <div className="absolute top-4 right-4 flex flex-col gap-2">
-                <Button size="icon" variant="secondary" className="bg-white shadow-md">
-                  <span className="text-xl">+</span>
-                </Button>
-                <Button size="icon" variant="secondary" className="bg-white shadow-md">
-                  <span className="text-xl">−</span>
-                </Button>
-              </div>
-
               {/* Legend */}
               <div className="absolute bottom-4 left-4 p-3 bg-white rounded-md shadow-md">
                 <h3 className="font-medium mb-2">Legenda</h3>
                 <div className="space-y-1 text-sm">
                   <div className="flex items-center gap-2">
-                    <span className="inline-block h-3 w-3 rounded-full bg-primary"></span>
+                    <span className="inline-block h-3 w-3 rounded-full bg-blue-500"></span>
                     <span>Pendentes</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="inline-block h-3 w-3 rounded-full bg-warning"></span>
+                    <span className="inline-block h-3 w-3 rounded-full bg-orange-500"></span>
                     <span>Em andamento</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="inline-block h-3 w-3 rounded-full bg-success"></span>
+                    <span className="inline-block h-3 w-3 rounded-full bg-green-500"></span>
                     <span>Resolvidas</span>
                   </div>
                 </div>

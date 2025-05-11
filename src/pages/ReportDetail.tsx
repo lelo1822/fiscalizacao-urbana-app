@@ -4,8 +4,10 @@ import Layout from "../components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { MapPin, Clock, FileText, ArrowUp } from "lucide-react";
 import LocationTracker from "@/components/LocationTracker";
+import ReportLocationMap from "@/components/ReportLocationMap";
 
 // Mock report data (in a real app, this would come from an API)
 const mockReportData = {
@@ -103,6 +105,13 @@ const ReportDetail = () => {
                   <p className="text-sm text-muted-foreground mt-1">
                     Coordenadas: {report.coordinates.lat.toFixed(6)}, {report.coordinates.lng.toFixed(6)}
                   </p>
+                  <div className="mt-3">
+                    <ReportLocationMap 
+                      latitude={report.coordinates.lat}
+                      longitude={report.coordinates.lng}
+                      height="200px"
+                    />
+                  </div>
                 </div>
               </div>
               

@@ -2,6 +2,8 @@
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useAuth } from "../context/AuthContext";
+import { Tooltip } from "@/components/ui/tooltip";
+import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 interface LocationPoint {
   latitude: number;
@@ -15,6 +17,7 @@ const LocationTracker = () => {
   const [locationHistory, setLocationHistory] = useState<LocationPoint[]>([]);
   const [watchId, setWatchId] = useState<number | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
 
   // Start tracking when component mounts
   useEffect(() => {
@@ -42,6 +45,7 @@ const LocationTracker = () => {
           };
           
           setLocationHistory((prevHistory) => [...prevHistory, newPoint]);
+          setLastUpdate(new Date());
           
           // Save to localStorage (in a real app, you'd send this to a server)
           const storageKey = `locationHistory_${user?.id}`;
@@ -81,11 +85,29 @@ const LocationTracker = () => {
   };
 
   return (
-    <div className="fixed bottom-4 right-4 z-10">
-      <div className={`h-3 w-3 rounded-full ${tracking ? 'bg-success animate-pulse-beacon' : 'bg-destructive'}`}>
-        <span className="sr-only">{tracking ? 'Rastreando localização' : 'Rastreamento inativo'}</span>
-      </div>
-    </div>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <div className="fixed bottom-4 right-4 z-10">
+            <div className={`flex items-center gap-2 px-3 py-1.5 rounded-full ${tracking ? 'bg-success/20' : 'bg-destructive/20'} shadow-md`}>
+              <div className={`h-3 w-3 rounded-full ${tracking ? 'bg-success animate-pulse' : 'bg-destructive'}`} />
+              <span className="text-xs font-medium">
+                {tracking ? 'Localização ativa' : 'Sem localização'}
+              </span>
+            </div>
+          </div>
+        </TooltipTrigger>
+        <TooltipContent side="top">
+          <p>{tracking ? 'Sua localização está sendo rastreada' : 'Não foi possível rastrear sua localização'}</p>
+          {lastUpdate && tracking && (
+            <p className="text-xs text-muted-foreground mt-1">
+              Última atualização: {lastUpdate.toLocaleTimeString()}
+            </p>
+          )}
+          {error && !tracking && <p className="text-xs text-destructive">{error}</p>}
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
