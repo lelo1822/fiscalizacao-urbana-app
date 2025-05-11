@@ -17,6 +17,7 @@ import RouteHistory from "./pages/RouteHistory";
 import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
+import FloatingActionButton from "./components/FloatingActionButton";
 
 const queryClient = new QueryClient();
 
@@ -40,6 +41,7 @@ const App = () => (
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
+          <FloatingActionButton />
         </BrowserRouter>
       </TooltipProvider>
     </AuthProvider>

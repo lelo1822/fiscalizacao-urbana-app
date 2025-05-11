@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -6,10 +5,11 @@ import LocationTracker from "@/components/LocationTracker";
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowUp, ArrowDown, Camera, MapPin, FileText, BarChart3, AlertCircle } from "lucide-react";
+import { ArrowUp, ArrowDown, Camera, MapPin, FileText, BarChart3, AlertCircle, Check } from "lucide-react";
 import LeafletMap from "@/components/LeafletMap";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useToast } from "@/components/ui/use-toast";
 
 // Mock data para estatísticas do dashboard
 const stats = [
@@ -80,11 +80,13 @@ const dailyTasks = [
 const Dashboard = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { toast } = useToast();
   const [userPosition, setUserPosition] = useState<[number, number] | null>(null);
   const [todayDate, setTodayDate] = useState("");
   const [nearbyIssues, setNearbyIssues] = useState<any[]>([]);
   const [tasks, setTasks] = useState(dailyTasks);
   const [weatherInfo, setWeatherInfo] = useState<{ temp: number; condition: string; icon: string } | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Formatar data atual
   useEffect(() => {
@@ -122,11 +124,45 @@ const Dashboard = () => {
     });
   }, []);
 
-  // Marcar tarefa como concluída
+  // Marcar tarefa como concluída com feedback visual
   const toggleTaskCompleted = (taskId: number) => {
-    setTasks(tasks.map(task => 
-      task.id === taskId ? { ...task, completed: !task.completed } : task
-    ));
+    setTasks(tasks.map(task => {
+      if (task.id === taskId) {
+        const newStatus = !task.completed;
+        
+        // Mostrar toast confirmando a ação
+        toast({
+          title: newStatus ? "Tarefa concluída" : "Tarefa reaberta",
+          description: newStatus ? "A tarefa foi marcada como concluída." : "A tarefa foi marcada como pendente.",
+          variant: newStatus ? "default" : "destructive",
+        });
+        
+        return { ...task, completed: newStatus };
+      }
+      return task;
+    }));
+  };
+
+  // Função para lidar com novo relatório rápido
+  const handleQuickReport = (categoryName: string) => {
+    setIsLoading(true);
+    
+    // Simular carregamento para melhor experiência do usuário
+    setTimeout(() => {
+      setIsLoading(false);
+      navigate('/report/new', { state: { category: categoryName } });
+    }, 300);
+  };
+
+  // Função para ver detalhes da ocorrência com feedback
+  const handleViewReport = (reportId: number) => {
+    setIsLoading(true);
+    
+    // Simular carregamento para melhor experiência do usuário
+    setTimeout(() => {
+      setIsLoading(false);
+      navigate(`/report/${reportId}`);
+    }, 200);
   };
 
   // Preparar marcadores para o mapa
@@ -156,6 +192,7 @@ const Dashboard = () => {
             <Button 
               onClick={() => navigate('/report/new')}
               className="bg-success hover:bg-success/90"
+              disabled={isLoading}
             >
               <Camera className="mr-2 h-4 w-4" />
               Nova Ocorrência
@@ -164,6 +201,7 @@ const Dashboard = () => {
               variant="outline"
               onClick={() => navigate('/map')}
               className="border-primary text-primary hover:bg-primary/10"
+              disabled={isLoading}
             >
               <MapPin className="mr-2 h-4 w-4" />
               Ver Mapa
@@ -174,7 +212,7 @@ const Dashboard = () => {
         {/* Statistics */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           {stats.map((stat, index) => (
-            <Card key={index}>
+            <Card key={index} className="hover:shadow-md transition-shadow">
               <CardContent className="p-6">
                 <div className="flex justify-between items-start">
                   <div>
@@ -199,7 +237,7 @@ const Dashboard = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
           {/* Mapa de ocorrências */}
-          <Card className="lg:col-span-2">
+          <Card className="lg:col-span-2 hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <CardTitle>Mapa de Ocorrências</CardTitle>
             </CardHeader>
@@ -208,14 +246,14 @@ const Dashboard = () => {
                 height="320px"
                 markers={mapMarkers}
                 showUserLocation={true}
-                onMarkerClick={(marker) => navigate(`/report/${marker.id}`)}
+                onMarkerClick={(marker) => handleViewReport(marker.id)}
                 center={userPosition || [-23.55052, -46.633308]}
               />
             </CardContent>
           </Card>
           
           {/* Tarefas do dia */}
-          <Card>
+          <Card className="hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <CardTitle>Tarefas do Dia</CardTitle>
             </CardHeader>
@@ -226,15 +264,19 @@ const Dashboard = () => {
                     key={task.id} 
                     className={`flex items-center justify-between p-3 border rounded-md ${
                       task.completed ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-200'
-                    }`}
+                    } transition-colors duration-200 hover:border-primary/30`}
                   >
                     <div className="flex items-center space-x-3">
-                      <input 
-                        type="checkbox" 
-                        checked={task.completed} 
-                        onChange={() => toggleTaskCompleted(task.id)} 
-                        className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                      />
+                      <Button
+                        variant="outline"
+                        size="icon"
+                        className={`h-6 w-6 rounded-full p-0 ${
+                          task.completed ? 'bg-primary text-white' : 'bg-transparent text-gray-400'
+                        }`}
+                        onClick={() => toggleTaskCompleted(task.id)}
+                      >
+                        {task.completed && <Check className="h-3 w-3" />}
+                      </Button>
                       <div>
                         <p className={`font-medium ${task.completed ? 'line-through text-gray-400' : ''}`}>
                           {task.title}
@@ -257,7 +299,7 @@ const Dashboard = () => {
 
         {/* Ocorrências Próximas */}
         {nearbyIssues.length > 0 && (
-          <Card className="mb-6">
+          <Card className="mb-6 hover:shadow-md transition-shadow">
             <CardHeader className="pb-3">
               <CardTitle className="flex items-center">
                 <AlertCircle className="h-5 w-5 text-warning mr-2" />
@@ -269,7 +311,7 @@ const Dashboard = () => {
                 {nearbyIssues.map((issue) => (
                   <div
                     key={issue.id}
-                    className="p-4 border rounded-md bg-amber-50 border-amber-200 flex justify-between items-center"
+                    className="p-4 border rounded-md bg-amber-50 border-amber-200 flex justify-between items-center hover:bg-amber-100 transition-colors"
                   >
                     <div>
                       <h4 className="font-medium">{issue.type}</h4>
@@ -284,7 +326,13 @@ const Dashboard = () => {
                         </span>
                       </div>
                     </div>
-                    <Button variant="outline" size="sm" onClick={() => navigate(`/report/${issue.id}`)}>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => handleViewReport(issue.id)}
+                      disabled={isLoading}
+                      className="hover:bg-amber-200 hover:text-amber-800"
+                    >
                       Ver Detalhes
                     </Button>
                   </div>
@@ -295,7 +343,7 @@ const Dashboard = () => {
         )}
 
         {/* Quick Report Categories */}
-        <Card className="mb-6">
+        <Card className="mb-6 hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
             <CardTitle>Registrar ocorrência rápida</CardTitle>
           </CardHeader>
@@ -305,8 +353,9 @@ const Dashboard = () => {
                 <Button
                   key={category.id}
                   variant="outline"
-                  className="h-auto py-4 flex flex-col items-center justify-center hover:border-primary hover:text-primary"
-                  onClick={() => navigate('/report/new', { state: { category: category.name } })}
+                  className="h-auto py-4 flex flex-col items-center justify-center transition-all duration-200 hover:border-primary hover:text-primary"
+                  onClick={() => handleQuickReport(category.name)}
+                  disabled={isLoading}
                 >
                   <span className="text-2xl mb-2">{category.icon}</span>
                   <span className="text-sm text-center">{category.name}</span>
@@ -317,7 +366,7 @@ const Dashboard = () => {
         </Card>
 
         {/* Recent Reports */}
-        <Card>
+        <Card className="hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
             <CardTitle>Ocorrências Recentes</CardTitle>
           </CardHeader>
@@ -335,7 +384,7 @@ const Dashboard = () => {
                 </thead>
                 <tbody>
                   {recentReports.map((report) => (
-                    <tr key={report.id} className="border-b">
+                    <tr key={report.id} className="border-b hover:bg-gray-50 transition-colors">
                       <td className="py-3 px-2">{report.type}</td>
                       <td className="py-3 px-2">{report.address}</td>
                       <td className="py-3 px-2">{report.date}</td>
@@ -353,7 +402,8 @@ const Dashboard = () => {
                           size="sm" 
                           variant="ghost"
                           className="h-8 px-2 text-primary"
-                          onClick={() => navigate(`/report/${report.id}`)}
+                          onClick={() => handleViewReport(report.id)}
+                          disabled={isLoading}
                         >
                           Ver detalhes
                         </Button>
@@ -368,6 +418,7 @@ const Dashboard = () => {
                 variant="outline"
                 onClick={() => navigate('/map')}
                 className="border-primary text-primary hover:bg-primary/10"
+                disabled={isLoading}
               >
                 <FileText className="mr-2 h-4 w-4" />
                 Ver todos os relatórios

@@ -1,9 +1,10 @@
 
-import { useState } from "react";
-import { NavLink } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import { useToast } from "@/components/ui/use-toast";
 import { 
   MapPin, 
   BarChart3, 
@@ -15,14 +16,30 @@ import {
   X,
   Settings
 } from "lucide-react";
+import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
 
 const Sidebar = () => {
   const { user, logout } = useAuth();
+  const { toast } = useToast();
+  const location = useLocation();
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+
+  // Feche o menu móvel ao navegar para uma nova rota
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      setIsMobileMenuOpen(false);
+    }
+  }, [location.pathname]);
 
   const toggleSidebar = () => {
     setIsCollapsed(!isCollapsed);
+    
+    toast({
+      description: isCollapsed ? "Menu expandido" : "Menu recolhido",
+      duration: 1500,
+    });
   };
 
   const toggleMobileMenu = () => {
@@ -30,7 +47,18 @@ const Sidebar = () => {
   };
 
   const handleLogout = () => {
-    logout();
+    setIsLoggingOut(true);
+    
+    // Simular um pequeno delay para feedback visual
+    toast({
+      title: "Saindo da aplicação",
+      description: "Você será redirecionado em instantes...",
+    });
+    
+    setTimeout(() => {
+      logout();
+      setIsLoggingOut(false);
+    }, 800);
   };
 
   const navItems = [
@@ -75,6 +103,7 @@ const Sidebar = () => {
           size="icon"
           className="bg-white shadow-md"
           onClick={toggleMobileMenu}
+          aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu"}
         >
           {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
         </Button>
@@ -82,11 +111,11 @@ const Sidebar = () => {
       
       {/* Mobile Sidebar */}
       <div className={cn(
-        "fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity",
+        "fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300",
         isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
       )}>
         <div className={cn(
-          "fixed top-0 left-0 h-full w-64 bg-white shadow-lg transition-transform transform",
+          "fixed top-0 left-0 h-full w-64 bg-white shadow-lg transition-transform transform duration-300 ease-in-out",
           isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
         )}>
           <div className="p-4">
@@ -96,6 +125,7 @@ const Sidebar = () => {
                 variant="ghost" 
                 size="icon"
                 onClick={toggleMobileMenu}
+                aria-label="Fechar menu"
               >
                 <X className="h-5 w-5" />
               </Button>
@@ -120,6 +150,7 @@ const Sidebar = () => {
               size="icon"
               onClick={toggleSidebar}
               className={isCollapsed ? "mx-auto" : ""}
+              aria-label={isCollapsed ? "Expandir menu" : "Recolher menu"}
             >
               <Menu className="h-5 w-5" />
             </Button>
@@ -162,11 +193,14 @@ const Sidebar = () => {
                     isActive 
                       ? "bg-primary text-white" 
                       : "text-gray-700 hover:bg-gray-100",
-                    isCollapsed ? "justify-center" : ""
+                    isCollapsed ? "justify-center" : "",
+                    "transition-all duration-200"
                   )}
                 >
                   {item.icon}
-                  {!isCollapsed && <span className="ml-3">{item.name}</span>}
+                  {!isCollapsed && (
+                    <span className="ml-3 transition-opacity duration-200">{item.name}</span>
+                  )}
                 </NavLink>
               </li>
             ))}
@@ -179,11 +213,17 @@ const Sidebar = () => {
             variant="ghost" 
             className={cn(
               "text-gray-700 hover:bg-gray-100 w-full flex items-center",
-              isCollapsed ? "justify-center" : ""
+              isCollapsed ? "justify-center" : "",
+              "transition-all duration-200"
             )}
             onClick={handleLogout}
+            disabled={isLoggingOut}
           >
-            <LogOut className="h-5 w-5" />
+            {isLoggingOut ? (
+              <span className="h-5 w-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
+            ) : (
+              <LogOut className="h-5 w-5" />
+            )}
             {!isCollapsed && <span className="ml-3">Sair</span>}
           </Button>
         </div>
