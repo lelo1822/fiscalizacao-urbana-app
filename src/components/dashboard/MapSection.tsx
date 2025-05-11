@@ -1,15 +1,7 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import LeafletMap from "@/components/LeafletMap";
-
-interface MapMarker {
-  id: string | number;
-  position: [number, number];
-  title: string;
-  type: string;
-  status: 'pending' | 'in_progress' | 'resolved';
-  priority: 'high' | 'medium' | 'low';
-}
+import type { MapMarker } from "@/types/map";
 
 interface MapSectionProps {
   mapMarkers: MapMarker[];
