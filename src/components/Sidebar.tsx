@@ -12,7 +12,8 @@ import {
   Camera,
   LogOut,
   Menu,
-  X
+  X,
+  Settings
 } from "lucide-react";
 
 const Sidebar = () => {
@@ -57,6 +58,11 @@ const Sidebar = () => {
       name: "Perfil",
       path: "/profile",
       icon: <User className="h-5 w-5" />,
+    },
+    {
+      name: "Configurações",
+      path: "/settings",
+      icon: <Settings className="h-5 w-5" />,
     },
   ];
 

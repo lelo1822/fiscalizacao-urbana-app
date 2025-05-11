@@ -14,6 +14,7 @@ import ReportForm from "./pages/ReportForm";
 import ReportDetail from "./pages/ReportDetail";
 import Profile from "./pages/Profile";
 import RouteHistory from "./pages/RouteHistory";
+import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
 
@@ -36,6 +37,7 @@ const App = () => (
             <Route path="/report/:id" element={<ProtectedRoute><ReportDetail /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
             <Route path="/routes" element={<ProtectedRoute><RouteHistory /></ProtectedRoute>} />
+            <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
