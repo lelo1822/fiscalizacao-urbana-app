@@ -80,11 +80,15 @@ export const useMapMarkers = ({
     if (showHeatmap && markers.length > 0 && (window as any).L.heatLayer) {
       if (mapInstance.current) {
         // Remove existing heatmap if any
-        const existingHeatmapLayers = Object.values(mapInstance.current._layers || {})
-          .filter((layer: any) => layer._heat);
+        const existingHeatmapLayers = Object.values(mapInstance.current.getContainer())
+          .filter((element: any) => 
+            element && element._heat && typeof element.remove === 'function'
+          );
           
         existingHeatmapLayers.forEach((layer: any) => {
-          mapInstance.current?.removeLayer(layer);
+          if (typeof layer.remove === 'function') {
+            layer.remove();
+          }
         });
         
         // Create heatmap data
