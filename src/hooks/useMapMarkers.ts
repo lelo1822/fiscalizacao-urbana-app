@@ -86,13 +86,11 @@ export const useMapMarkers = ({
       // Add heatmap if requested and markers are available
       if (showHeatmap && markers.length > 0 && mapInstance.current && (window as any).L.heatLayer) {
         // Remove existing heatmap if any
-        const existingLayers = mapInstance.current.getLayers 
-          ? mapInstance.current.getLayers() 
-          : [];
-        
-        const existingHeatmapLayers = existingLayers.filter((layer: any) => 
-          layer && layer._heat && typeof layer.remove === 'function'
-        );
+        // Use _layers object since getLayers() method doesn't exist on L.Map
+        const existingHeatmapLayers = Object.values(mapInstance.current._layers || {})
+          .filter((layer: any) => 
+            layer && layer._heat && typeof layer.remove === 'function'
+          );
           
         existingHeatmapLayers.forEach((layer: any) => {
           if (typeof layer.remove === 'function') {

@@ -24,7 +24,7 @@ export const useMapUserLocation = ({
   const watchId = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!showUserLocation || !isMapReady) return;
+    if (!showUserLocation || !isMapReady || !mapInstance.current) return;
 
     // Get user icon
     const userIcon = createUserLocationIcon();
@@ -40,29 +40,40 @@ export const useMapUserLocation = ({
         return;
       }
       
-      if (userLocationMarker.current) {
-        userLocationMarker.current.setLatLng([latitude, longitude]);
-      } else {
-        userLocationMarker.current = L.marker([latitude, longitude], { icon: userIcon })
-          .addTo(mapInstance.current);
+      try {
+        if (userLocationMarker.current) {
+          userLocationMarker.current.setLatLng([latitude, longitude]);
+        } else {
+          userLocationMarker.current = L.marker([latitude, longitude], { icon: userIcon });
+          
+          if (mapInstance.current) {
+            userLocationMarker.current.addTo(mapInstance.current);
+          
+            // Center map on user location
+            mapInstance.current.setView([latitude, longitude], 
+              isMobile ? Math.min(16, mapInstance.current.getZoom()) : mapInstance.current.getZoom());
+          }
+        }
         
-        // Center map on user location
-        mapInstance.current.setView([latitude, longitude], 
-          isMobile ? Math.min(16, mapInstance.current.getZoom()) : mapInstance.current.getZoom());
-      }
-      
-      // Update accuracy circle
-      if (accuracyCircle.current) {
-        accuracyCircle.current.setLatLng([latitude, longitude]);
-        accuracyCircle.current.setRadius(accuracy);
-      } else if (mapInstance.current) {
-        accuracyCircle.current = L.circle([latitude, longitude], {
-          radius: accuracy,
-          color: '#3b82f6',
-          fillColor: '#3b82f6',
-          fillOpacity: 0.1,
-          weight: 1
-        }).addTo(mapInstance.current);
+        // Update accuracy circle
+        if (accuracyCircle.current) {
+          accuracyCircle.current.setLatLng([latitude, longitude]);
+          accuracyCircle.current.setRadius(accuracy);
+        } else if (mapInstance.current) {
+          accuracyCircle.current = L.circle([latitude, longitude], {
+            radius: accuracy,
+            color: '#3b82f6',
+            fillColor: '#3b82f6',
+            fillOpacity: 0.1,
+            weight: 1
+          });
+          
+          if (mapInstance.current) {
+            accuracyCircle.current.addTo(mapInstance.current);
+          }
+        }
+      } catch (error) {
+        console.error("Error updating user location on map:", error);
       }
     };
 
@@ -94,7 +105,7 @@ export const useMapUserLocation = ({
     };
 
     // Set up geolocation watching only if not previously denied
-    if (!permissionDenied) {
+    if (!permissionDenied && navigator.geolocation) {
       if ("permissions" in navigator) {
         // Check for permissions first if the API is available
         navigator.permissions
@@ -124,19 +135,23 @@ export const useMapUserLocation = ({
     }
 
     function setupGeolocation() {
-      // Get initial location
-      navigator.geolocation.getCurrentPosition(
-        updateUserLocation,
-        handleLocationError,
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-      );
+      try {
+        // Get initial location
+        navigator.geolocation.getCurrentPosition(
+          updateUserLocation,
+          handleLocationError,
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
 
-      // Set up watching
-      watchId.current = navigator.geolocation.watchPosition(
-        updateUserLocation,
-        handleLocationError,
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
-      );
+        // Set up watching
+        watchId.current = navigator.geolocation.watchPosition(
+          updateUserLocation,
+          handleLocationError,
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+        );
+      } catch (error) {
+        console.error("Error setting up geolocation:", error);
+      }
     }
 
     // Cleanup function
@@ -147,12 +162,20 @@ export const useMapUserLocation = ({
       }
       
       if (userLocationMarker.current && mapInstance.current) {
-        mapInstance.current.removeLayer(userLocationMarker.current);
+        try {
+          mapInstance.current.removeLayer(userLocationMarker.current);
+        } catch (error) {
+          console.error("Error removing user marker:", error);
+        }
         userLocationMarker.current = null;
       }
       
       if (accuracyCircle.current && mapInstance.current) {
-        mapInstance.current.removeLayer(accuracyCircle.current);
+        try {
+          mapInstance.current.removeLayer(accuracyCircle.current);
+        } catch (error) {
+          console.error("Error removing accuracy circle:", error);
+        }
         accuracyCircle.current = null;
       }
     };
@@ -162,7 +185,7 @@ export const useMapUserLocation = ({
   const centerOnUser = () => {
     if (mapInstance.current && userLocation) {
       mapInstance.current.setView(userLocation, 16);
-    } else if (!userLocation && !permissionDenied) {
+    } else if (!userLocation && !permissionDenied && navigator.geolocation) {
       // Try to get location again if not available
       navigator.geolocation.getCurrentPosition(
         (position) => {

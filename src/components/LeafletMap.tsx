@@ -56,34 +56,33 @@ const LeafletMap = ({
     }
   }, [isMapReady]);
 
-  // Only render the dependent hooks after map is initialized
-  const { userLocation, centerOnUser } = isMapInitialized ? useMapUserLocation({
+  // Declare hook variables outside conditionals to maintain hook order
+  const userLocationHook = useMapUserLocation({
     mapInstance,
-    isMapReady,
+    isMapReady: isMapInitialized,
     showUserLocation,
     isMobile
-  }) : { userLocation: null, centerOnUser: () => {} };
+  });
+  
+  // Use the hooks unconditionally but control their effects with isMapInitialized flag
+  useMapMarkers({
+    mapInstance,
+    markersLayer,
+    markers,
+    isMapReady: isMapInitialized,
+    onMarkerClick,
+    showHeatmap
+  });
 
-  // Handle map markers
-  if (isMapInitialized) {
-    useMapMarkers({
-      mapInstance,
-      markersLayer,
-      markers,
-      isMapReady,
-      onMarkerClick,
-      showHeatmap
-    });
-  }
+  useMapTraffic({
+    mapInstance,
+    showTraffic,
+    isMapReady: isMapInitialized
+  });
 
-  // Handle traffic layer
-  if (isMapInitialized) {
-    useMapTraffic({
-      mapInstance,
-      showTraffic,
-      isMapReady
-    });
-  }
+  // Extract values from userLocationHook
+  const userLocation = userLocationHook.userLocation;
+  const centerOnUser = userLocationHook.centerOnUser;
 
   return (
     <div className="relative">

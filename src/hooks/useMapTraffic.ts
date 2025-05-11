@@ -31,14 +31,19 @@ export const useMapTraffic = ({
           // This is a simulated traffic layer - in a real scenario, we would use a traffic API
           trafficLayer.current = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             opacity: 0.7
-          }).addTo(mapInstance.current);
-          
-          toast({
-            title: "Camada de tráfego",
-            description: "Camada de tráfego adicionada ao mapa",
-            duration: 2000,
-            variant: "default"
           });
+          
+          // Check if mapInstance is still valid before adding layer
+          if (mapInstance.current) {
+            trafficLayer.current.addTo(mapInstance.current);
+            
+            toast({
+              title: "Camada de tráfego",
+              description: "Camada de tráfego adicionada ao mapa",
+              duration: 2000,
+              variant: "default"
+            });
+          }
         } catch (error) {
           console.error("Error adding traffic layer:", error);
           toast({
