@@ -2,6 +2,7 @@
 import L from 'leaflet';
 import { useEffect, useRef } from 'react';
 import 'leaflet/dist/leaflet.css';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface RoutePoint {
   latitude: number;
@@ -24,7 +25,8 @@ const RouteMap = ({
 }: RouteMapProps) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<L.Map | null>(null);
-
+  const isMobile = useIsMobile();
+  
   useEffect(() => {
     if (!mapContainerRef.current || routePoints.length === 0) return;
     
@@ -32,6 +34,9 @@ const RouteMap = ({
     const map = L.map(mapContainerRef.current, {
       zoomControl: true,
       attributionControl: false,
+      dragging: true, // Importante para dispositivos móveis
+      tap: true, // Importante para dispositivos móveis
+      touchZoom: true, // Importante para dispositivos móveis
     });
     
     mapRef.current = map;
@@ -100,8 +105,15 @@ const RouteMap = ({
     
     // Ajustar o zoom para visualizar toda a rota
     map.fitBounds(routePath.getBounds(), {
-      padding: [40, 40]
+      padding: isMobile ? [20, 20] : [40, 40],
+      maxZoom: isMobile ? 16 : 15,
+      animate: true
     });
+    
+    // Corrigir problema do Leaflet em dispositivos móveis
+    setTimeout(() => {
+      map.invalidateSize();
+    }, 300);
     
     return () => {
       if (mapRef.current) {
@@ -109,7 +121,7 @@ const RouteMap = ({
         mapRef.current = null;
       }
     };
-  }, [routePoints, showMarkers]);
+  }, [routePoints, showMarkers, isMobile]);
 
   return (
     <div 
