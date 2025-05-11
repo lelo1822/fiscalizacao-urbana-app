@@ -32,57 +32,63 @@ export const useMapMarkers = ({
   showHeatmap
 }: UseMapMarkersProps) => {
   useEffect(() => {
-    if (!mapInstance.current || !markersLayer.current || !isMapReady) return;
+    if (!isMapReady) return;
+    
+    // Check if map and layer are available
+    if (!mapInstance.current || !markersLayer.current) {
+      console.warn("Map instance or markers layer is not available when trying to add markers");
+      return;
+    }
 
-    // Clear existing markers
-    markersLayer.current.clearLayers();
+    try {
+      // Clear existing markers
+      markersLayer.current.clearLayers();
 
-    // Add new markers
-    markers.forEach((marker) => {
-      const { position, title, status, id, type, priority, date } = marker;
+      // Add new markers
+      markers.forEach((marker) => {
+        const { position, title, status, id, type, priority, date } = marker;
 
-      // Get marker color and size based on status/priority
-      const markerColor = getMarkerColor(status, priority);
-      const markerSize = getMarkerSize(priority);
-      
-      // Create custom icon
-      const customIcon = createCustomMarkerIcon(markerColor, markerSize);
-
-      // Add marker to map
-      const mapMarker = L.marker(position, { icon: customIcon })
-        .addTo(markersLayer.current!);
-
-      // Add popup if title or type is available
-      if (title || type) {
-        const formattedDate = date ? new Date(date).toLocaleString('pt-BR') : '';
+        // Get marker color and size based on status/priority
+        const markerColor = getMarkerColor(status, priority);
+        const markerSize = getMarkerSize(priority);
         
-        const popupContent = `
-          <div class="popup-content">
-            <h3 class="font-bold">${title || type || 'Ocorrência'}</h3>
-            ${type && title ? `<p>${type}</p>` : ''}
-            ${date ? `<p class="text-xs mt-1">${formattedDate}</p>` : ''}
-            <p class="text-xs mt-1">${status === 'resolved' ? 'Resolvido' : 
-              status === 'in_progress' ? 'Em andamento' : 'Pendente'}</p>
-          </div>
-        `;
-        mapMarker.bindPopup(popupContent);
-      }
+        // Create custom icon
+        const customIcon = createCustomMarkerIcon(markerColor, markerSize);
 
-      // Add click handler if provided
-      if (onMarkerClick) {
-        mapMarker.on('click', () => {
-          onMarkerClick(marker);
-        });
-      }
-    });
+        // Add marker to map
+        const mapMarker = L.marker(position, { icon: customIcon })
+          .addTo(markersLayer.current!);
 
-    // Add heatmap if requested and markers are available
-    if (showHeatmap && markers.length > 0 && (window as any).L.heatLayer) {
-      if (mapInstance.current) {
+        // Add popup if title or type is available
+        if (title || type) {
+          const formattedDate = date ? new Date(date).toLocaleString('pt-BR') : '';
+          
+          const popupContent = `
+            <div class="popup-content">
+              <h3 class="font-bold">${title || type || 'Ocorrência'}</h3>
+              ${type && title ? `<p>${type}</p>` : ''}
+              ${date ? `<p class="text-xs mt-1">${formattedDate}</p>` : ''}
+              <p class="text-xs mt-1">${status === 'resolved' ? 'Resolvido' : 
+                status === 'in_progress' ? 'Em andamento' : 'Pendente'}</p>
+            </div>
+          `;
+          mapMarker.bindPopup(popupContent);
+        }
+
+        // Add click handler if provided
+        if (onMarkerClick) {
+          mapMarker.on('click', () => {
+            onMarkerClick(marker);
+          });
+        }
+      });
+
+      // Add heatmap if requested and markers are available
+      if (showHeatmap && markers.length > 0 && mapInstance.current && (window as any).L.heatLayer) {
         // Remove existing heatmap if any
-        const existingHeatmapLayers = Object.values(mapInstance.current.getContainer())
-          .filter((element: any) => 
-            element && element._heat && typeof element.remove === 'function'
+        const existingHeatmapLayers = Object.values(mapInstance.current._layers || {})
+          .filter((layer: any) => 
+            layer && layer._heat && typeof layer.remove === 'function'
           );
           
         existingHeatmapLayers.forEach((layer: any) => {
@@ -102,7 +108,8 @@ export const useMapMarkers = ({
           gradient: { 0.4: 'blue', 0.65: 'lime', 1: 'red' }
         }).addTo(mapInstance.current);
       }
+    } catch (error) {
+      console.error("Error handling map markers:", error);
     }
-
   }, [markers, onMarkerClick, isMapReady, showHeatmap, mapInstance, markersLayer]);
 };

@@ -24,7 +24,7 @@ export const useMapUserLocation = ({
   const watchId = useRef<number | null>(null);
 
   useEffect(() => {
-    if (!showUserLocation || !mapInstance.current || !isMapReady) return;
+    if (!showUserLocation || !isMapReady) return;
 
     // Get user icon
     const userIcon = createUserLocationIcon();
@@ -34,14 +34,20 @@ export const useMapUserLocation = ({
       const { latitude, longitude, accuracy } = position.coords;
       setUserLocation([latitude, longitude]);
       
+      // Ensure map instance exists before trying to add markers
+      if (!mapInstance.current) {
+        console.warn("Map instance is not available when trying to add user location marker");
+        return;
+      }
+      
       if (userLocationMarker.current) {
         userLocationMarker.current.setLatLng([latitude, longitude]);
       } else {
         userLocationMarker.current = L.marker([latitude, longitude], { icon: userIcon })
-          .addTo(mapInstance.current!);
+          .addTo(mapInstance.current);
         
         // Center map on user location
-        mapInstance.current?.setView([latitude, longitude], 
+        mapInstance.current.setView([latitude, longitude], 
           isMobile ? Math.min(16, mapInstance.current.getZoom()) : mapInstance.current.getZoom());
       }
       
@@ -49,14 +55,14 @@ export const useMapUserLocation = ({
       if (accuracyCircle.current) {
         accuracyCircle.current.setLatLng([latitude, longitude]);
         accuracyCircle.current.setRadius(accuracy);
-      } else {
+      } else if (mapInstance.current) {
         accuracyCircle.current = L.circle([latitude, longitude], {
           radius: accuracy,
           color: '#3b82f6',
           fillColor: '#3b82f6',
           fillOpacity: 0.1,
           weight: 1
-        }).addTo(mapInstance.current!);
+        }).addTo(mapInstance.current);
       }
     };
 
@@ -162,7 +168,9 @@ export const useMapUserLocation = ({
         (position) => {
           const { latitude, longitude } = position.coords;
           setUserLocation([latitude, longitude]);
-          mapInstance.current?.setView([latitude, longitude], 16);
+          if (mapInstance.current) {
+            mapInstance.current.setView([latitude, longitude], 16);
+          }
         },
         (error) => {
           console.error('Erro ao centralizar no usuário:', error);

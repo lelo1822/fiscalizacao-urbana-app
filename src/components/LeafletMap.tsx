@@ -1,5 +1,5 @@
 
-import { useRef } from 'react';
+import { useRef, useState, useEffect } from 'react';
 import 'leaflet/dist/leaflet.css';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMapInitialization } from '@/hooks/useMapInitialization';
@@ -46,36 +46,50 @@ const LeafletMap = ({
     interactive
   });
 
-  // Handle user location
-  const { userLocation, centerOnUser } = useMapUserLocation({
+  // State to track when it's safe to use map-dependent hooks
+  const [isMapInitialized, setIsMapInitialized] = useState(false);
+  
+  // Only enable dependent hooks after map is confirmed to be ready
+  useEffect(() => {
+    if (isMapReady && mapInstance.current) {
+      setIsMapInitialized(true);
+    }
+  }, [isMapReady]);
+
+  // Only render the dependent hooks after map is initialized
+  const { userLocation, centerOnUser } = isMapInitialized ? useMapUserLocation({
     mapInstance,
     isMapReady,
     showUserLocation,
     isMobile
-  });
+  }) : { userLocation: null, centerOnUser: () => {} };
 
   // Handle map markers
-  useMapMarkers({
-    mapInstance,
-    markersLayer,
-    markers,
-    isMapReady,
-    onMarkerClick,
-    showHeatmap
-  });
+  if (isMapInitialized) {
+    useMapMarkers({
+      mapInstance,
+      markersLayer,
+      markers,
+      isMapReady,
+      onMarkerClick,
+      showHeatmap
+    });
+  }
 
   // Handle traffic layer
-  useMapTraffic({
-    mapInstance,
-    showTraffic,
-    isMapReady
-  });
+  if (isMapInitialized) {
+    useMapTraffic({
+      mapInstance,
+      showTraffic,
+      isMapReady
+    });
+  }
 
   return (
     <div className="relative">
       <div ref={mapContainer} style={{ height, width: '100%' }} />
       
-      {showUserLocation && userLocation && (
+      {showUserLocation && userLocation && isMapInitialized && (
         <button
           onClick={centerOnUser}
           className="absolute bottom-4 left-4 bg-primary text-white rounded-full p-2 shadow-lg z-[400]"
