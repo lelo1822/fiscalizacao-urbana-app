@@ -1,6 +1,6 @@
 
-import { useEffect, useState } from "react";
-import { toast } from "sonner";
+import { useEffect, useState, useRef } from "react";
+import { toast } from "@/hooks/use-toast";
 import { useAuth } from "../context/AuthContext";
 import { Tooltip } from "@/components/ui/tooltip";
 import { TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
@@ -18,15 +18,15 @@ const LocationTracker = () => {
   const { user } = useAuth();
   const [tracking, setTracking] = useState(false);
   const [locationHistory, setLocationHistory] = useState<LocationPoint[]>([]);
-  const [watchId, setWatchId] = useState<number | null>(null);
+  const watchIdRef = useRef<number | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [batteryCharging, setBatteryCharging] = useState<boolean>(false);
+  const [permissionDenied, setPermissionDenied] = useState(false);
 
   // Start tracking when component mounts
   useEffect(() => {
-    startTracking();
     // Monitor battery if available
     if ('getBattery' in navigator) {
       const getBatteryInfo = async () => {
@@ -51,6 +51,40 @@ const LocationTracker = () => {
       };
       getBatteryInfo();
     }
+
+    // Check geolocation permissions
+    if ("permissions" in navigator) {
+      navigator.permissions
+        .query({ name: "geolocation" as PermissionName })
+        .then((result) => {
+          if (result.state === "granted" || result.state === "prompt") {
+            startTracking();
+          } else if (result.state === "denied") {
+            setPermissionDenied(true);
+            setError("Permissão de localização negada");
+            setTracking(false);
+          }
+          
+          // Listen for permission changes
+          result.addEventListener("change", () => {
+            if (result.state === "granted") {
+              setPermissionDenied(false);
+              startTracking();
+            } else if (result.state === "denied") {
+              setPermissionDenied(true);
+              stopTracking();
+              setError("Permissão de localização negada");
+            }
+          });
+        })
+        .catch(() => {
+          // If permissions API fails, try directly
+          startTracking();
+        });
+    } else {
+      // Fallback for browsers without permissions API
+      startTracking();
+    }
     
     return () => {
       // Clean up by stopping tracking when component unmounts
@@ -61,38 +95,65 @@ const LocationTracker = () => {
   const startTracking = () => {
     if (!navigator.geolocation) {
       setError("Geolocalização não é suportada pelo seu navegador");
-      toast.error("Geolocalização não é suportada pelo seu navegador");
+      toast({
+        title: "Erro",
+        description: "Geolocalização não é suportada pelo seu navegador",
+        variant: "destructive"
+      });
       return;
     }
 
     try {
+      // Function to handle geolocation success
+      const handleLocationSuccess = (position: GeolocationPosition) => {
+        const newPoint: LocationPoint = {
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+          timestamp: Date.now(),
+          accuracy: position.coords.accuracy,
+          speed: position.coords.speed,
+        };
+        
+        setLocationHistory((prevHistory) => [...prevHistory, newPoint]);
+        setLastUpdate(new Date());
+        
+        // Save to localStorage (in a real app, you'd send this to a server)
+        const storageKey = `locationHistory_${user?.id}`;
+        const storedHistory = JSON.parse(localStorage.getItem(storageKey) || "[]");
+        localStorage.setItem(storageKey, JSON.stringify([...storedHistory, newPoint]));
+        
+        setError(null);
+        setTracking(true);
+      };
+
+      // Function to handle geolocation errors
+      const handleLocationError = (error: GeolocationPositionError) => {
+        console.error("Erro de geolocalização:", error);
+        
+        let errorMessage = "Erro de geolocalização desconhecido";
+        
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMessage = "Permissão de localização negada";
+            setPermissionDenied(true);
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMessage = "Informações de localização indisponíveis";
+            break;
+          case error.TIMEOUT:
+            errorMessage = "Tempo esgotado ao obter localização";
+            break;
+        }
+        
+        setError(errorMessage);
+        toast.error(errorMessage);
+        setTracking(false);
+      };
+
+      // Start watching position
       const id = navigator.geolocation.watchPosition(
-        (position) => {
-          const newPoint: LocationPoint = {
-            latitude: position.coords.latitude,
-            longitude: position.coords.longitude,
-            timestamp: Date.now(),
-            accuracy: position.coords.accuracy,
-            speed: position.coords.speed,
-          };
-          
-          setLocationHistory((prevHistory) => [...prevHistory, newPoint]);
-          setLastUpdate(new Date());
-          
-          // Save to localStorage (in a real app, you'd send this to a server)
-          const storageKey = `locationHistory_${user?.id}`;
-          const storedHistory = JSON.parse(localStorage.getItem(storageKey) || "[]");
-          localStorage.setItem(storageKey, JSON.stringify([...storedHistory, newPoint]));
-          
-          setError(null);
-          setTracking(true);
-        },
-        (err) => {
-          console.error("Erro de geolocalização:", err);
-          setError(`Erro de geolocalização: ${err.message}`);
-          toast.error(`Erro de geolocalização: ${err.message}`);
-          setTracking(false);
-        },
+        handleLocationSuccess,
+        handleLocationError,
         {
           enableHighAccuracy: true,
           timeout: 15000,
@@ -100,7 +161,7 @@ const LocationTracker = () => {
         }
       );
       
-      setWatchId(id);
+      watchIdRef.current = id;
     } catch (err) {
       console.error("Erro ao iniciar rastreamento:", err);
       setError("Erro ao iniciar rastreamento");
@@ -109,9 +170,9 @@ const LocationTracker = () => {
   };
 
   const stopTracking = () => {
-    if (watchId !== null) {
-      navigator.geolocation.clearWatch(watchId);
-      setWatchId(null);
+    if (watchIdRef.current !== null) {
+      navigator.geolocation.clearWatch(watchIdRef.current);
+      watchIdRef.current = null;
       setTracking(false);
     }
   };
@@ -164,6 +225,11 @@ const LocationTracker = () => {
             </p>
           )}
           {error && !tracking && <p className="text-xs text-destructive">{error}</p>}
+          {permissionDenied && (
+            <p className="text-xs text-destructive mt-1">
+              Para habilitar o rastreamento, permita o acesso à sua localização nas configurações do navegador.
+            </p>
+          )}
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Filter, Layers } from "lucide-react";
 import LeafletMap from "@/components/LeafletMap";
 import type { MapMarker } from "@/types/map";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -49,7 +50,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
         toast({
           title: "Filtros removidos",
           description: "Mostrando todas as ocorrências",
-          variant: "success"
+          variant: "default"
         });
       }
     } else {
@@ -62,7 +63,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
         toast({
           title: `${filtered.length} ocorrências encontradas`,
           description: `Filtro${newFilters.length > 1 ? 's' : ''}: ${newFilters.join(', ')}`,
-          variant: "info"
+          variant: "default"
         });
       }
     }
@@ -176,7 +177,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
               toast({
                 title: "Filtros limpos",
                 description: "Mostrando todas as ocorrências",
-                variant: "success"
+                variant: "default"
               });
             }}
           >

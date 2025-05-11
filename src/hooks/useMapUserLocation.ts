@@ -1,7 +1,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import { toast } from "@/components/ui/use-toast";
+import { toast } from "@/hooks/use-toast";
 import { createUserLocationIcon } from '@/utils/leaflet-utils';
 
 interface UseMapUserLocationProps {
@@ -18,8 +18,10 @@ export const useMapUserLocation = ({
   isMobile
 }: UseMapUserLocationProps) => {
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [permissionDenied, setPermissionDenied] = useState(false);
   const userLocationMarker = useRef<L.Marker | null>(null);
   const accuracyCircle = useRef<L.Circle | null>(null);
+  const watchId = useRef<number | null>(null);
 
   useEffect(() => {
     if (!showUserLocation || !mapInstance.current || !isMapReady) return;
@@ -58,31 +60,85 @@ export const useMapUserLocation = ({
       }
     };
 
-    // Set up geolocation watching
-    const watchId = navigator.geolocation.watchPosition(
-      updateUserLocation,
-      (error) => {
-        console.error('Erro ao obter localização:', error);
-      },
-      { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
-    );
+    // Function to handle geolocation errors
+    const handleLocationError = (error: GeolocationPositionError) => {
+      console.error('Erro ao obter localização:', error);
+      let errorMessage = 'Erro ao acessar sua localização atual';
 
-    // Get initial location
-    navigator.geolocation.getCurrentPosition(
-      updateUserLocation,
-      (error) => {
-        console.error('Erro ao obter localização:', error);
-        toast({
-          title: "Erro de localização",
-          description: 'Não foi possível obter sua localização atual',
-          variant: "destructive"
-        });
+      switch(error.code) {
+        case error.PERMISSION_DENIED:
+          errorMessage = 'Permissão de localização negada pelo usuário';
+          setPermissionDenied(true);
+          break;
+        case error.POSITION_UNAVAILABLE:
+          errorMessage = 'Informação de localização indisponível';
+          break;
+        case error.TIMEOUT:
+          errorMessage = 'Tempo esgotado ao tentar obter localização';
+          break;
+        default:
+          errorMessage = `Erro de geolocalização: ${error.message}`;
       }
-    );
+
+      toast({
+        title: "Erro de localização",
+        description: errorMessage,
+        variant: "destructive"
+      });
+    };
+
+    // Set up geolocation watching only if not previously denied
+    if (!permissionDenied) {
+      if ("permissions" in navigator) {
+        // Check for permissions first if the API is available
+        navigator.permissions
+          .query({ name: "geolocation" as PermissionName })
+          .then((result) => {
+            if (result.state === "granted" || result.state === "prompt") {
+              setupGeolocation();
+            } else if (result.state === "denied") {
+              setPermissionDenied(true);
+              handleLocationError({
+                code: 1,
+                message: "Permissão de localização negada",
+                PERMISSION_DENIED: 1,
+                POSITION_UNAVAILABLE: 2,
+                TIMEOUT: 3
+              });
+            }
+          })
+          .catch(() => {
+            // If permissions API fails, try directly
+            setupGeolocation();
+          });
+      } else {
+        // Fallback for browsers without permissions API
+        setupGeolocation();
+      }
+    }
+
+    function setupGeolocation() {
+      // Get initial location
+      navigator.geolocation.getCurrentPosition(
+        updateUserLocation,
+        handleLocationError,
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+
+      // Set up watching
+      watchId.current = navigator.geolocation.watchPosition(
+        updateUserLocation,
+        handleLocationError,
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+      );
+    }
 
     // Cleanup function
     return () => {
-      navigator.geolocation.clearWatch(watchId);
+      if (watchId.current !== null) {
+        navigator.geolocation.clearWatch(watchId.current);
+        watchId.current = null;
+      }
       
       if (userLocationMarker.current && mapInstance.current) {
         mapInstance.current.removeLayer(userLocationMarker.current);
@@ -94,17 +150,42 @@ export const useMapUserLocation = ({
         accuracyCircle.current = null;
       }
     };
-  }, [showUserLocation, isMapReady, isMobile, mapInstance]);
+  }, [showUserLocation, isMapReady, isMobile, mapInstance, permissionDenied]);
 
   // Function to center map on user location
   const centerOnUser = () => {
     if (mapInstance.current && userLocation) {
       mapInstance.current.setView(userLocation, 16);
+    } else if (!userLocation && !permissionDenied) {
+      // Try to get location again if not available
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const { latitude, longitude } = position.coords;
+          setUserLocation([latitude, longitude]);
+          mapInstance.current?.setView([latitude, longitude], 16);
+        },
+        (error) => {
+          console.error('Erro ao centralizar no usuário:', error);
+          toast({
+            title: "Localização indisponível",
+            description: "Não foi possível obter sua localização atual",
+            variant: "destructive"
+          });
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    } else if (permissionDenied) {
+      toast({
+        title: "Permissão negada",
+        description: "Habilite a localização no seu navegador para usar este recurso",
+        variant: "destructive"
+      });
     }
   };
 
   return {
     userLocation,
-    centerOnUser
+    centerOnUser,
+    permissionDenied
   };
 };
