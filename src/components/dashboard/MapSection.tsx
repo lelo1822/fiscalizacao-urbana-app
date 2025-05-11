@@ -1,10 +1,9 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import LeafletMap from "@/components/LeafletMap";
-import { useNavigate } from "react-router-dom";
 
 interface MapMarker {
-  id: number;
+  id: string | number;
   position: [number, number];
   title: string;
   type: string;
@@ -29,7 +28,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
           height="320px"
           markers={mapMarkers}
           showUserLocation={true}
-          onMarkerClick={(marker) => onMarkerClick(marker)}
+          onMarkerClick={onMarkerClick}
           center={userPosition || [-23.55052, -46.633308]}
         />
       </CardContent>

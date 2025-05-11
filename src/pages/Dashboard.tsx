@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import LocationTracker from "@/components/LocationTracker";
@@ -35,6 +34,16 @@ const Dashboard = () => {
     navigate('/report/new', { state: { category: categoryName } });
   };
 
+  // Update the marker click handler to match the expected type
+  const handleMapMarkerClick = (marker: any) => {
+    // Extract the ID from the marker and pass it to handleViewReport
+    handleViewReport(Number(marker.id))
+      .then(() => {
+        navigate(`/report/${marker.id}`);
+      });
+  };
+
+  // Keep the handleViewReportClick function for other components
   const handleViewReportClick = async (reportId: number) => {
     await handleViewReport(reportId);
     navigate(`/report/${reportId}`);
@@ -54,7 +63,7 @@ const Dashboard = () => {
           <MapSection 
             mapMarkers={mapMarkers} 
             userPosition={userPosition} 
-            onMarkerClick={handleViewReportClick} 
+            onMarkerClick={handleMapMarkerClick} 
           />
           
           <TasksSection initialTasks={dailyTasks} />

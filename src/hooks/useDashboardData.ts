@@ -165,7 +165,7 @@ export const useDashboardData = () => {
     });
   };
 
-  // Preparar marcadores para o mapa
+  // Preparar marcadores para o mapa com IDs que podem ser string ou number
   const mapMarkers = recentReports.map(report => ({
     id: report.id,
     position: report.position,
