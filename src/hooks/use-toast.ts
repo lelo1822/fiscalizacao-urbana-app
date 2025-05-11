@@ -1,3 +1,4 @@
+
 import * as React from "react"
 
 import type {
@@ -5,7 +6,7 @@ import type {
   ToastProps,
 } from "@/components/ui/toast"
 
-const TOAST_LIMIT = 1
+const TOAST_LIMIT = 5
 const TOAST_REMOVE_DELAY = 1000000
 
 type ToasterToast = ToastProps & {
@@ -25,7 +26,7 @@ const actionTypes = {
 let count = 0
 
 function genId() {
-  count = (count + 1) % Number.MAX_SAFE_INTEGER
+  count = (count + 1) % Number.MAX_VALUE
   return count.toString()
 }
 
@@ -186,6 +187,26 @@ function useToast() {
     toast,
     dismiss: (toastId?: string) => dispatch({ type: "DISMISS_TOAST", toastId }),
   }
+}
+
+toast.dismiss = (toastId?: string) => {
+  dispatch({ type: "DISMISS_TOAST", toastId })
+}
+
+toast.success = (title: string, options?: Omit<ToasterToast, "id">) => {
+  return toast({ title, ...options, variant: "default" })
+}
+
+toast.error = (title: string, options?: Omit<ToasterToast, "id">) => {
+  return toast({ title, ...options, variant: "destructive" })
+}
+
+toast.warning = (title: string, options?: Omit<ToasterToast, "id">) => {
+  return toast({ title, ...options, variant: "default" })
+}
+
+toast.info = (title: string, options?: Omit<ToasterToast, "id">) => {
+  return toast({ title, ...options, variant: "default" })
 }
 
 export { useToast, toast }
