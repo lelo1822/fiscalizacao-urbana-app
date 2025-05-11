@@ -22,9 +22,14 @@ export const useMapUserLocation = ({
   const userLocationMarker = useRef<L.Marker | null>(null);
   const accuracyCircle = useRef<L.Circle | null>(null);
   const watchId = useRef<number | null>(null);
+  const isInitialized = useRef(false);
 
   useEffect(() => {
     if (!showUserLocation || !isMapReady || !mapInstance.current) return;
+
+    // Prevent duplicate initialization
+    if (isInitialized.current) return;
+    isInitialized.current = true;
 
     // Get user icon
     const userIcon = createUserLocationIcon();
@@ -34,11 +39,8 @@ export const useMapUserLocation = ({
       const { latitude, longitude, accuracy } = position.coords;
       setUserLocation([latitude, longitude]);
       
-      // Ensure map instance exists before trying to add markers
-      if (!mapInstance.current) {
-        console.warn("Map instance is not available when trying to add user location marker");
-        return;
-      }
+      // Only proceed if map instance exists
+      if (!mapInstance.current) return;
       
       try {
         if (userLocationMarker.current) {
@@ -47,11 +49,15 @@ export const useMapUserLocation = ({
           userLocationMarker.current = L.marker([latitude, longitude], { icon: userIcon });
           
           if (mapInstance.current) {
-            userLocationMarker.current.addTo(mapInstance.current);
-          
-            // Center map on user location
-            mapInstance.current.setView([latitude, longitude], 
-              isMobile ? Math.min(16, mapInstance.current.getZoom()) : mapInstance.current.getZoom());
+            try {
+              userLocationMarker.current.addTo(mapInstance.current);
+            
+              // Center map on user location
+              mapInstance.current.setView([latitude, longitude], 
+                isMobile ? Math.min(16, mapInstance.current.getZoom()) : mapInstance.current.getZoom());
+            } catch (addError) {
+              console.error("Error adding user marker to map:", addError);
+            }
           }
         }
         
@@ -69,7 +75,11 @@ export const useMapUserLocation = ({
           });
           
           if (mapInstance.current) {
-            accuracyCircle.current.addTo(mapInstance.current);
+            try {
+              accuracyCircle.current.addTo(mapInstance.current);
+            } catch (circleError) {
+              console.error("Error adding accuracy circle to map:", circleError);
+            }
           }
         }
       } catch (error) {
@@ -104,6 +114,26 @@ export const useMapUserLocation = ({
       });
     };
 
+    const setupGeolocation = () => {
+      try {
+        // Get initial location
+        navigator.geolocation.getCurrentPosition(
+          updateUserLocation,
+          handleLocationError,
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        );
+
+        // Set up watching
+        watchId.current = navigator.geolocation.watchPosition(
+          updateUserLocation,
+          handleLocationError,
+          { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+        );
+      } catch (error) {
+        console.error("Error setting up geolocation:", error);
+      }
+    };
+
     // Set up geolocation watching only if not previously denied
     if (!permissionDenied && navigator.geolocation) {
       if ("permissions" in navigator) {
@@ -134,26 +164,6 @@ export const useMapUserLocation = ({
       }
     }
 
-    function setupGeolocation() {
-      try {
-        // Get initial location
-        navigator.geolocation.getCurrentPosition(
-          updateUserLocation,
-          handleLocationError,
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
-
-        // Set up watching
-        watchId.current = navigator.geolocation.watchPosition(
-          updateUserLocation,
-          handleLocationError,
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
-        );
-      } catch (error) {
-        console.error("Error setting up geolocation:", error);
-      }
-    }
-
     // Cleanup function
     return () => {
       if (watchId.current !== null) {
@@ -178,6 +188,8 @@ export const useMapUserLocation = ({
         }
         accuracyCircle.current = null;
       }
+
+      isInitialized.current = false;
     };
   }, [showUserLocation, isMapReady, isMobile, mapInstance, permissionDenied]);
 

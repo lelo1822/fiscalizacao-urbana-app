@@ -85,29 +85,34 @@ export const useMapMarkers = ({
 
       // Add heatmap if requested and markers are available
       if (showHeatmap && markers.length > 0 && mapInstance.current && (window as any).L.heatLayer) {
-        // Remove existing heatmap if any
-        // Use _layers object since getLayers() method doesn't exist on L.Map
-        const existingHeatmapLayers = Object.values(mapInstance.current._layers || {})
-          .filter((layer: any) => 
-            layer && layer._heat && typeof layer.remove === 'function'
-          );
-          
-        existingHeatmapLayers.forEach((layer: any) => {
-          if (typeof layer.remove === 'function') {
-            layer.remove();
+        try {
+          // Find and remove existing heatmaps before adding a new one
+          if (mapInstance.current) {
+            // Use proper Leaflet API to manage layers
+            const existingLayers = mapInstance.current.eachLayer;
+            
+            if (existingLayers) {
+              mapInstance.current.eachLayer((layer: any) => {
+                if (layer && layer._heat && typeof layer.remove === 'function') {
+                  layer.remove();
+                }
+              });
+            }
           }
-        });
-        
-        // Create heatmap data
-        const heatData = markers.map(m => [...m.position, 0.5]); // Latitude, Longitude, Intensity
-        
-        // Add new heatmap layer
-        (window as any).L.heatLayer(heatData, {
-          radius: 25,
-          blur: 15,
-          maxZoom: 17,
-          gradient: { 0.4: 'blue', 0.65: 'lime', 1: 'red' }
-        }).addTo(mapInstance.current);
+          
+          // Create heatmap data
+          const heatData = markers.map(m => [...m.position, 0.5]); // Latitude, Longitude, Intensity
+          
+          // Add new heatmap layer
+          (window as any).L.heatLayer(heatData, {
+            radius: 25,
+            blur: 15,
+            maxZoom: 17,
+            gradient: { 0.4: 'blue', 0.65: 'lime', 1: 'red' }
+          }).addTo(mapInstance.current);
+        } catch (heatError) {
+          console.error("Error handling heatmap:", heatError);
+        }
       }
     } catch (error) {
       console.error("Error handling map markers:", error);
