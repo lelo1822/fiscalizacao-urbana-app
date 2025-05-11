@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -6,7 +5,7 @@ import { Filter, Layers } from "lucide-react";
 import LeafletMap from "@/components/LeafletMap";
 import type { MapMarker } from "@/types/map";
 import { Badge } from "@/components/ui/badge";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -47,8 +46,10 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
     if (newFilters.length === 0) {
       setFilteredMarkers(mapMarkers);
       if (activeFilters.length > 0) {
-        toast.success("Filtros removidos", {
-          description: "Mostrando todas as ocorrências"
+        toast({
+          title: "Filtros removidos",
+          description: "Mostrando todas as ocorrências",
+          variant: "success"
         });
       }
     } else {
@@ -58,8 +59,10 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
       setFilteredMarkers(filtered);
       
       if (newFilters.length !== activeFilters.length || !activeFilters.every(f => newFilters.includes(f))) {
-        toast.info(`${filtered.length} ocorrências encontradas`, {
-          description: `Filtro${newFilters.length > 1 ? 's' : ''}: ${newFilters.join(', ')}`
+        toast({
+          title: `${filtered.length} ocorrências encontradas`,
+          description: `Filtro${newFilters.length > 1 ? 's' : ''}: ${newFilters.join(', ')}`,
+          variant: "info"
         });
       }
     }
@@ -69,8 +72,9 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
   const toggleLayer = (layer: 'heatmap' | 'traffic', value: boolean) => {
     if (layer === 'heatmap') {
       setShowHeatmap(value);
-      toast.info(value ? "Mapa de calor ativado" : "Mapa de calor desativado", {
-        duration: 2000,
+      toast({
+        title: value ? "Mapa de calor ativado" : "Mapa de calor desativado", 
+        duration: 2000
       });
     } else {
       setShowTraffic(value);
@@ -169,8 +173,10 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
             onClick={() => {
               setActiveFilters([]);
               setFilteredMarkers(mapMarkers);
-              toast.success("Filtros limpos", {
-                description: "Mostrando todas as ocorrências"
+              toast({
+                title: "Filtros limpos",
+                description: "Mostrando todas as ocorrências",
+                variant: "success"
               });
             }}
           >

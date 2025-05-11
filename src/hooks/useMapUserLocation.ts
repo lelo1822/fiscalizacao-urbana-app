@@ -1,7 +1,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import { createUserLocationIcon } from '@/utils/leaflet-utils';
 
 interface UseMapUserLocationProps {
@@ -72,7 +72,11 @@ export const useMapUserLocation = ({
       updateUserLocation,
       (error) => {
         console.error('Erro ao obter localização:', error);
-        toast.error('Não foi possível obter sua localização atual');
+        toast({
+          title: "Erro de localização",
+          description: 'Não foi possível obter sua localização atual',
+          variant: "destructive"
+        });
       }
     );
 

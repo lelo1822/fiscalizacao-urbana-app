@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +14,7 @@ import LocationTracker from "@/components/LocationTracker";
 import { useAuth } from "@/context/AuthContext";
 import { Badge } from "@/components/ui/badge";
 import RouteMap from "@/components/RouteMap";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 
 interface LocationPoint {
   latitude: number;
@@ -116,7 +115,11 @@ const RouteHistory = () => {
         setStopPoints(stops);
       } catch (err) {
         console.error("Erro ao carregar dados:", err);
-        toast.error("Erro ao carregar dados da rota");
+        toast({
+          title: "Erro",
+          description: "Erro ao carregar dados da rota",
+          variant: "destructive"
+        });
       } finally {
         setIsLoading(false);
       }

@@ -1,7 +1,7 @@
 
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
-import { toast } from 'sonner';
+import { toast } from '@/components/ui/use-toast';
 
 interface UseMapTrafficProps {
   mapInstance: React.MutableRefObject<L.Map | null>;
@@ -26,7 +26,11 @@ export const useMapTraffic = ({
           opacity: 0.7
         }).addTo(mapInstance.current);
         
-        toast.info("Camada de tráfego adicionada", { duration: 2000 });
+        toast({
+          title: "Camada de tráfego",
+          description: "Camada de tráfego adicionada ao mapa",
+          duration: 2000
+        });
       }
     } else if (trafficLayer.current) {
       mapInstance.current.removeLayer(trafficLayer.current);

@@ -4,7 +4,7 @@ import Layout from "../components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { toast } from "sonner";
+import { toast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import LocationTracker from "@/components/LocationTracker";
 import LeafletMap from "@/components/LeafletMap";
@@ -97,7 +97,11 @@ const MapView = () => {
         },
         (error) => {
           console.error("Erro ao obter localização:", error);
-          toast.error("Não foi possível obter sua localização");
+          toast({
+            title: "Erro",
+            description: "Não foi possível obter sua localização",
+            variant: "destructive"
+          });
         }
       );
     }
