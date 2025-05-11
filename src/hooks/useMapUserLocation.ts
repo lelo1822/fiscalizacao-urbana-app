@@ -24,6 +24,50 @@ export const useMapUserLocation = ({
   const watchId = useRef<number | null>(null);
   const isInitialized = useRef(false);
 
+  // Gracefully handle location errors without crashing
+  const handleLocationError = (error: GeolocationPositionError | Error) => {
+    console.error('Erro ao obter localização:', error);
+    
+    // Check if it's a GeolocationPositionError
+    if ('code' in error) {
+      let errorMessage = 'Erro ao acessar sua localização atual';
+
+      switch(error.code) {
+        case 1: // PERMISSION_DENIED
+          errorMessage = 'Permissão de localização negada pelo usuário';
+          setPermissionDenied(true);
+          break;
+        case 2: // POSITION_UNAVAILABLE
+          errorMessage = 'Informação de localização indisponível';
+          break;
+        case 3: // TIMEOUT
+          errorMessage = 'Tempo esgotado ao tentar obter localização';
+          break;
+        default:
+          errorMessage = `Erro de geolocalização: ${error.message}`;
+      }
+
+      // Only show toast for genuine errors, not just permission denials
+      if (error.code !== 1) {
+        toast({
+          title: "Erro de localização",
+          description: errorMessage,
+          variant: "destructive"
+        });
+      } else {
+        // For permission denials, just log it to console
+        console.log(errorMessage);
+      }
+    } else {
+      // Generic error handling
+      toast({
+        title: "Erro de localização",
+        description: "Não foi possível obter sua localização atual",
+        variant: "destructive"
+      });
+    }
+  };
+
   useEffect(() => {
     if (!showUserLocation || !isMapReady || !mapInstance.current) return;
 
@@ -87,50 +131,28 @@ export const useMapUserLocation = ({
       }
     };
 
-    // Function to handle geolocation errors
-    const handleLocationError = (error: GeolocationPositionError) => {
-      console.error('Erro ao obter localização:', error);
-      let errorMessage = 'Erro ao acessar sua localização atual';
-
-      switch(error.code) {
-        case error.PERMISSION_DENIED:
-          errorMessage = 'Permissão de localização negada pelo usuário';
-          setPermissionDenied(true);
-          break;
-        case error.POSITION_UNAVAILABLE:
-          errorMessage = 'Informação de localização indisponível';
-          break;
-        case error.TIMEOUT:
-          errorMessage = 'Tempo esgotado ao tentar obter localização';
-          break;
-        default:
-          errorMessage = `Erro de geolocalização: ${error.message}`;
-      }
-
-      toast({
-        title: "Erro de localização",
-        description: errorMessage,
-        variant: "destructive"
-      });
-    };
-
     const setupGeolocation = () => {
       try {
         // Get initial location
-        navigator.geolocation.getCurrentPosition(
-          updateUserLocation,
-          handleLocationError,
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-        );
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(
+            updateUserLocation,
+            handleLocationError,
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+          );
 
-        // Set up watching
-        watchId.current = navigator.geolocation.watchPosition(
-          updateUserLocation,
-          handleLocationError,
-          { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
-        );
+          // Set up watching
+          watchId.current = navigator.geolocation.watchPosition(
+            updateUserLocation,
+            handleLocationError,
+            { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+          );
+        } else {
+          throw new Error('Geolocation is not supported by this browser');
+        }
       } catch (error) {
         console.error("Error setting up geolocation:", error);
+        handleLocationError(error as Error);
       }
     };
 
@@ -145,14 +167,34 @@ export const useMapUserLocation = ({
               setupGeolocation();
             } else if (result.state === "denied") {
               setPermissionDenied(true);
-              handleLocationError({
-                code: 1,
+              // Create a mock error to handle the denied permission
+              const mockError = {
+                code: 1, // PERMISSION_DENIED
                 message: "Permissão de localização negada",
                 PERMISSION_DENIED: 1,
                 POSITION_UNAVAILABLE: 2,
                 TIMEOUT: 3
-              });
+              };
+              handleLocationError(mockError as GeolocationPositionError);
             }
+            
+            // Listen for permission changes
+            result.addEventListener("change", () => {
+              if (result.state === "granted") {
+                setPermissionDenied(false);
+                setupGeolocation();
+              } else if (result.state === "denied") {
+                setPermissionDenied(true);
+                const mockError = {
+                  code: 1, // PERMISSION_DENIED
+                  message: "Permissão de localização negada",
+                  PERMISSION_DENIED: 1,
+                  POSITION_UNAVAILABLE: 2,
+                  TIMEOUT: 3
+                };
+                handleLocationError(mockError as GeolocationPositionError);
+              }
+            });
           })
           .catch(() => {
             // If permissions API fails, try directly

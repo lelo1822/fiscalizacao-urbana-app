@@ -18,12 +18,15 @@ interface RouteMapVisualizationProps {
 }
 
 const RouteMapVisualization = ({ date, routePoints, isLoading }: RouteMapVisualizationProps) => {
+  // Format the date if it exists
+  const formattedDate = date ? format(date, "EEEE, dd 'de' MMMM", { locale: ptBR }) : '';
+
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 relative z-10">
       <CardHeader className="flex flex-row items-center justify-between">
         <CardTitle>Visualização da Rota</CardTitle>
         <div className="text-sm text-muted-foreground">
-          {date && format(date, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+          {formattedDate}
         </div>
       </CardHeader>
       <CardContent className="p-0">

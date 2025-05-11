@@ -15,7 +15,7 @@ const AgentFilter = ({ value, onChange }: AgentFilterProps) => {
         <SelectTrigger id="agentFilter" className="w-[180px]">
           <SelectValue placeholder="Todos os agentes" />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="z-50 bg-background shadow-lg">
           <SelectItem value="all">Todos os agentes</SelectItem>
           <SelectItem value="current">Meu histórico</SelectItem>
           <SelectItem value="agent1">Agente Silva</SelectItem>

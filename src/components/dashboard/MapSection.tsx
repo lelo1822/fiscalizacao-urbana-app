@@ -85,7 +85,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
 
   return (
     <Card className="lg:col-span-2 hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3 flex flex-row items-center justify-between">
+      <CardHeader className="pb-3 flex flex-row items-center justify-between relative z-30">
         <CardTitle>Mapa de Ocorrências</CardTitle>
         <div className="flex gap-2">
           <DropdownMenu>
@@ -100,7 +100,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
                 )}
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 z-50 bg-background shadow-lg">
               <DropdownMenuLabel>Tipos de Ocorrência</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {Object.entries(incidentTypes).map(([type, count]) => (
@@ -123,7 +123,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
                 <span>Camadas</span>
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuContent align="end" className="w-56 z-50 bg-background shadow-lg">
               <DropdownMenuCheckboxItem
                 checked={showHeatmap}
                 onCheckedChange={(checked) => toggleLayer('heatmap', checked)}

@@ -24,9 +24,14 @@ const LocationTracker = () => {
   const [batteryLevel, setBatteryLevel] = useState<number | null>(null);
   const [batteryCharging, setBatteryCharging] = useState<boolean>(false);
   const [permissionDenied, setPermissionDenied] = useState(false);
+  const isInitialized = useRef(false);
 
   // Start tracking when component mounts
   useEffect(() => {
+    // Prevent duplicate initialization
+    if (isInitialized.current) return;
+    isInitialized.current = true;
+    
     // Monitor battery if available
     if ('getBattery' in navigator) {
       const getBatteryInfo = async () => {
@@ -89,6 +94,7 @@ const LocationTracker = () => {
     return () => {
       // Clean up by stopping tracking when component unmounts
       stopTracking();
+      isInitialized.current = false;
     };
   }, []);
 
@@ -118,9 +124,16 @@ const LocationTracker = () => {
         setLastUpdate(new Date());
         
         // Save to localStorage (in a real app, you'd send this to a server)
-        const storageKey = `locationHistory_${user?.id}`;
-        const storedHistory = JSON.parse(localStorage.getItem(storageKey) || "[]");
-        localStorage.setItem(storageKey, JSON.stringify([...storedHistory, newPoint]));
+        if (user?.id) { // Make sure user exists before using localStorage
+          const storageKey = `locationHistory_${user.id}`;
+          try {
+            const storedHistoryStr = localStorage.getItem(storageKey);
+            const storedHistory = storedHistoryStr ? JSON.parse(storedHistoryStr) : [];
+            localStorage.setItem(storageKey, JSON.stringify([...storedHistory, newPoint]));
+          } catch (e) {
+            console.error("Error storing location history:", e);
+          }
+        }
         
         setError(null);
         setTracking(true);
@@ -136,36 +149,39 @@ const LocationTracker = () => {
           case error.PERMISSION_DENIED:
             errorMessage = "Permissão de localização negada";
             setPermissionDenied(true);
+            // Just set state but don't show intrusive toast for permission denial
             break;
           case error.POSITION_UNAVAILABLE:
             errorMessage = "Informações de localização indisponíveis";
+            toast.error(errorMessage);
             break;
           case error.TIMEOUT:
             errorMessage = "Tempo esgotado ao obter localização";
+            toast.error(errorMessage);
             break;
         }
         
         setError(errorMessage);
-        toast.error(errorMessage);
         setTracking(false);
       };
 
-      // Start watching position
-      const id = navigator.geolocation.watchPosition(
-        handleLocationSuccess,
-        handleLocationError,
-        {
-          enableHighAccuracy: true,
-          timeout: 15000,
-          maximumAge: 0,
-        }
-      );
-      
-      watchIdRef.current = id;
+      // Start watching position with appropriate error handling
+      if (navigator.geolocation) {
+        const id = navigator.geolocation.watchPosition(
+          handleLocationSuccess,
+          handleLocationError,
+          {
+            enableHighAccuracy: true,
+            timeout: 15000,
+            maximumAge: 0,
+          }
+        );
+        
+        watchIdRef.current = id;
+      }
     } catch (err) {
       console.error("Erro ao iniciar rastreamento:", err);
       setError("Erro ao iniciar rastreamento");
-      toast.error("Erro ao iniciar rastreamento");
     }
   };
 
@@ -193,7 +209,7 @@ const LocationTracker = () => {
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <div className="fixed bottom-4 right-4 z-10">
+          <div className="fixed bottom-4 right-4 z-40">
             <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-background shadow-md border">
               <div className="flex items-center gap-1.5">
                 <div className={`h-3 w-3 rounded-full ${tracking ? 'bg-success animate-pulse' : 'bg-destructive'}`} />
@@ -212,7 +228,7 @@ const LocationTracker = () => {
             </div>
           </div>
         </TooltipTrigger>
-        <TooltipContent side="top" className="max-w-[280px]">
+        <TooltipContent side="top" className="max-w-[280px] z-50">
           <p>{tracking ? 'Sua localização está sendo rastreada' : 'Não foi possível rastrear sua localização'}</p>
           {lastUpdate && tracking && (
             <p className="text-xs text-muted-foreground mt-1">
