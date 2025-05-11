@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import Layout from "../components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,6 +12,7 @@ import { ptBR } from "date-fns/locale";
 import { CalendarIcon, MapPin } from "lucide-react";
 import LocationTracker from "@/components/LocationTracker";
 import { useAuth } from "@/context/AuthContext";
+import { Badge } from "@/components/ui/badge";
 
 interface LocationPoint {
   latitude: number;
