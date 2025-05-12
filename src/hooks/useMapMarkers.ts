@@ -192,4 +192,3 @@ export const useMapMarkers = ({
     }
   }, [markers, onMarkerClick, isMapReady, showHeatmap, mapInstance, markersLayer, enableClustering]);
 };
-

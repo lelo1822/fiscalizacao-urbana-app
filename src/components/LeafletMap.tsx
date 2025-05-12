@@ -4,8 +4,9 @@ import 'leaflet/dist/leaflet.css';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useMapInitialization } from '@/hooks/useMapInitialization';
 import { useMapUserLocation } from '@/hooks/useMapUserLocation';
-import { useMapMarkers, MapMarker } from '@/hooks/useMapMarkers';
+import { useMapMarkers } from '@/hooks/useMapMarkers';
 import { useMapTraffic } from '@/hooks/useMapTraffic';
+import type { MapMarker } from '@/types/map';
 
 export type { MapMarker };
 
