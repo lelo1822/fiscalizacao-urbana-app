@@ -1,6 +1,9 @@
 
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import L from 'leaflet';
+import 'leaflet.markercluster/dist/leaflet.markercluster.js';
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 import { createCustomMarkerIcon, getMarkerColor, getMarkerSize, createPinMarkerIcon } from '@/utils/leaflet-utils';
 
 export interface MapMarker {
@@ -13,6 +16,7 @@ export interface MapMarker {
   date?: string;
   iconUrl?: string;
   iconType?: 'default' | 'circle' | 'pin';
+  cluster?: boolean;
 }
 
 interface UseMapMarkersProps {
@@ -22,6 +26,7 @@ interface UseMapMarkersProps {
   isMapReady: boolean;
   onMarkerClick?: (marker: MapMarker) => void;
   showHeatmap: boolean;
+  enableClustering?: boolean;
 }
 
 export const useMapMarkers = ({
@@ -30,8 +35,12 @@ export const useMapMarkers = ({
   markers,
   isMapReady,
   onMarkerClick,
-  showHeatmap
+  showHeatmap,
+  enableClustering = true
 }: UseMapMarkersProps) => {
+  // Ref para o cluster group
+  const markerClusterGroup = useRef<L.MarkerClusterGroup | null>(null);
+  
   useEffect(() => {
     if (!isMapReady) return;
     
@@ -44,10 +53,57 @@ export const useMapMarkers = ({
     try {
       // Clear existing markers
       markersLayer.current.clearLayers();
+      
+      // Remove existing cluster group if it exists
+      if (markerClusterGroup.current && mapInstance.current) {
+        mapInstance.current.removeLayer(markerClusterGroup.current);
+      }
+      
+      // Create a new marker cluster group if clustering is enabled
+      if (enableClustering) {
+        markerClusterGroup.current = L.markerClusterGroup({
+          maxClusterRadius: 40,
+          spiderfyOnMaxZoom: true,
+          showCoverageOnHover: false,
+          iconCreateFunction: (cluster) => {
+            const childCount = cluster.getChildCount();
+            
+            // Count markers by status
+            let pendingCount = 0;
+            let inProgressCount = 0;
+            let resolvedCount = 0;
+            
+            cluster.getAllChildMarkers().forEach((marker: any) => {
+              if (marker.options.status === 'pending') pendingCount++;
+              else if (marker.options.status === 'in_progress') inProgressCount++;
+              else if (marker.options.status === 'resolved') resolvedCount++;
+            });
+            
+            // Determine the primary color of the cluster based on majority status
+            let clusterColor = '#3b82f6'; // Default blue (pending)
+            if (resolvedCount > pendingCount && resolvedCount > inProgressCount) {
+              clusterColor = '#10b981'; // Green for mostly resolved
+            } else if (inProgressCount > pendingCount && inProgressCount > resolvedCount) {
+              clusterColor = '#f59e0b'; // Orange for mostly in progress
+            }
+            
+            // Create custom cluster icon
+            return L.divIcon({
+              html: `<div class="cluster-icon" style="background-color: ${clusterColor}; color: white; width: 30px; height: 30px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-weight: bold; border: 2px solid white;">${childCount}</div>`,
+              className: 'custom-cluster-icon',
+              iconSize: L.point(30, 30)
+            });
+          }
+        });
+        
+        if (mapInstance.current) {
+          mapInstance.current.addLayer(markerClusterGroup.current);
+        }
+      }
 
       // Add new markers
       markers.forEach((marker) => {
-        const { position, title, status, id, type, priority, date, iconType } = marker;
+        const { position, title, status, id, type, priority, date, iconType, cluster = true } = marker;
 
         // Get marker color based on status/priority
         const markerColor = getMarkerColor(status, priority);
@@ -62,9 +118,12 @@ export const useMapMarkers = ({
           customIcon = createCustomMarkerIcon(markerColor, markerSize);
         }
 
-        // Add marker to map
-        const mapMarker = L.marker(position, { icon: customIcon })
-          .addTo(markersLayer.current!);
+        // Create the marker with status in options for cluster reference
+        const mapMarker = L.marker(position, { 
+          icon: customIcon,
+          // @ts-ignore - Adding status for cluster reference
+          status: status 
+        });
 
         // Add popup if title or type is available
         if (title || type) {
@@ -87,6 +146,13 @@ export const useMapMarkers = ({
           mapMarker.on('click', () => {
             onMarkerClick(marker);
           });
+        }
+
+        // Add marker either to cluster or directly to map based on config
+        if (enableClustering && cluster && markerClusterGroup.current) {
+          markerClusterGroup.current.addLayer(mapMarker);
+        } else {
+          markersLayer.current!.addLayer(mapMarker);
         }
       });
 
@@ -124,5 +190,5 @@ export const useMapMarkers = ({
     } catch (error) {
       console.error("Error handling map markers:", error);
     }
-  }, [markers, onMarkerClick, isMapReady, showHeatmap, mapInstance, markersLayer]);
+  }, [markers, onMarkerClick, isMapReady, showHeatmap, mapInstance, markersLayer, enableClustering]);
 };

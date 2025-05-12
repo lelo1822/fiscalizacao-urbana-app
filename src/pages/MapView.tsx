@@ -4,6 +4,7 @@ import Layout from "../components/Layout";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
+import { Switch } from "@/components/ui/switch";
 import { toast } from "@/components/ui/use-toast";
 import { useNavigate } from "react-router-dom";
 import LocationTracker from "@/components/LocationTracker";
@@ -59,6 +60,7 @@ const MapView = () => {
   const [markers, setMarkers] = useState<MapMarker[]>([]);
   const navigate = useNavigate();
   const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
+  const [enableClustering, setEnableClustering] = useState(true);
 
   // Filter reports based on selected filter
   useEffect(() => {
@@ -112,6 +114,16 @@ const MapView = () => {
   const handleMarkerClick = (marker: MapMarker) => {
     navigate(`/report/${marker.id}`);
   };
+
+  // Handle clustering toggle
+  const handleClusteringToggle = (enabled: boolean) => {
+    setEnableClustering(enabled);
+    toast({
+      title: enabled ? "Agrupamento de marcadores ativado" : "Agrupamento de marcadores desativado",
+      description: "A visualização do mapa foi atualizada",
+      duration: 2000
+    });
+  };
   
   return (
     <Layout>
@@ -143,6 +155,17 @@ const MapView = () => {
                 </SelectContent>
               </Select>
             </div>
+            
+            <div className="flex items-center gap-2">
+              <Label htmlFor="clustering" className="whitespace-nowrap">
+                Agrupar marcadores:
+              </Label>
+              <Switch
+                id="clustering"
+                checked={enableClustering}
+                onCheckedChange={handleClusteringToggle}
+              />
+            </div>
           </div>
         </div>
 
@@ -156,6 +179,7 @@ const MapView = () => {
                 zoom={13}
                 height="70vh"
                 onMarkerClick={handleMarkerClick}
+                enableClustering={enableClustering}
               />
               
               {/* Legend */}

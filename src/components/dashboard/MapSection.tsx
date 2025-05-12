@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -29,6 +28,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
   const [filteredMarkers, setFilteredMarkers] = useState<MapMarker[]>(mapMarkers);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [markerIconType, setMarkerIconType] = useState<'circle' | 'pin'>('circle');
+  const [enableClustering, setEnableClustering] = useState(true);
 
   // Count types of incidents for the filter menu
   const incidentTypes = mapMarkers.reduce<Record<string, number>>((acc, marker) => {
@@ -103,6 +103,16 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
     });
   };
 
+  // Toggle clustering
+  const toggleClustering = (value: boolean) => {
+    setEnableClustering(value);
+    
+    toast({
+      title: value ? "Agrupamento de marcadores ativado" : "Agrupamento de marcadores desativado",
+      duration: 2000
+    });
+  };
+
   return (
     <Card className="lg:col-span-2 hover:shadow-md transition-shadow">
       <CardHeader className="pb-3 flex flex-row items-center justify-between relative z-30">
@@ -158,6 +168,13 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
               >
                 Tráfego
               </DropdownMenuCheckboxItem>
+              <DropdownMenuCheckboxItem
+                checked={enableClustering}
+                onCheckedChange={(checked) => toggleClustering(checked)}
+                className="transition-colors hover:bg-secondary/20"
+              >
+                Agrupar marcadores
+              </DropdownMenuCheckboxItem>
               <DropdownMenuSeparator />
               <DropdownMenuLabel>Tipo de Marcador</DropdownMenuLabel>
               <DropdownMenuItem 
@@ -191,6 +208,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
           center={userPosition || [-23.55052, -46.633308]}
           showHeatmap={showHeatmap}
           showTraffic={showTraffic}
+          enableClustering={enableClustering}
         />
       </CardContent>
       <div className="p-3 border-t border-border flex flex-wrap gap-3 text-xs">

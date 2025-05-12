@@ -20,6 +20,7 @@ interface LeafletMapProps {
   showHeatmap?: boolean;
   interactive?: boolean;
   showControls?: boolean;
+  enableClustering?: boolean;
 }
 
 const LeafletMap = ({
@@ -32,7 +33,8 @@ const LeafletMap = ({
   showTraffic = false,
   showHeatmap = false,
   interactive = true,
-  showControls = true
+  showControls = true,
+  enableClustering = true
 }: LeafletMapProps) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const isMobile = useIsMobile();
@@ -61,7 +63,8 @@ const LeafletMap = ({
     markers,
     isMapReady,
     onMarkerClick,
-    showHeatmap
+    showHeatmap,
+    enableClustering
   });
 
   useMapTraffic({

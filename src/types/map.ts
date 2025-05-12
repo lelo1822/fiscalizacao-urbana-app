@@ -9,4 +9,5 @@ export interface MapMarker {
   date?: string;
   iconUrl?: string;
   iconType?: 'default' | 'circle' | 'pin';
+  cluster?: boolean;
 }
