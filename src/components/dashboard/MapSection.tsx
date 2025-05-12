@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Filter, Layers } from "lucide-react";
+import { Filter, Layers, MapPin } from "lucide-react";
 import LeafletMap from "@/components/LeafletMap";
 import type { MapMarker } from "@/types/map";
 import { Badge } from "@/components/ui/badge";
@@ -14,6 +14,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuItem,
 } from "@/components/ui/dropdown-menu";
 
 interface MapSectionProps {
@@ -27,6 +28,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
   const [showTraffic, setShowTraffic] = useState(false);
   const [filteredMarkers, setFilteredMarkers] = useState<MapMarker[]>(mapMarkers);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
+  const [markerIconType, setMarkerIconType] = useState<'circle' | 'pin'>('circle');
 
   // Count types of incidents for the filter menu
   const incidentTypes = mapMarkers.reduce<Record<string, number>>((acc, marker) => {
@@ -81,6 +83,24 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
       setShowTraffic(value);
       // Toast is handled in the useMapTraffic hook
     }
+  };
+
+  // Change marker icon type
+  const changeMarkerIconType = (type: 'circle' | 'pin') => {
+    setMarkerIconType(type);
+    
+    // Apply the icon type to all markers
+    const updatedMarkers = filteredMarkers.map(marker => ({
+      ...marker,
+      iconType: type
+    }));
+    
+    setFilteredMarkers(updatedMarkers);
+    
+    toast({
+      title: type === 'pin' ? "Marcadores em formato de seta ativados" : "Marcadores em formato circular ativados",
+      duration: 2000
+    });
   };
 
   return (
@@ -138,6 +158,26 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
               >
                 Tráfego
               </DropdownMenuCheckboxItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuLabel>Tipo de Marcador</DropdownMenuLabel>
+              <DropdownMenuItem 
+                onClick={() => changeMarkerIconType('circle')}
+                className={`transition-colors hover:bg-secondary/20 ${markerIconType === 'circle' ? 'bg-secondary/30' : ''}`}
+              >
+                <div className="flex items-center">
+                  <span className="inline-block h-3 w-3 rounded-full bg-blue-500 mr-2"></span>
+                  Circular
+                </div>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => changeMarkerIconType('pin')}
+                className={`transition-colors hover:bg-secondary/20 ${markerIconType === 'pin' ? 'bg-secondary/30' : ''}`}
+              >
+                <div className="flex items-center">
+                  <MapPin className="h-4 w-4 mr-2 text-red-500" />
+                  Seta
+                </div>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

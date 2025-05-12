@@ -1,7 +1,7 @@
 
 import { useEffect } from 'react';
 import L from 'leaflet';
-import { createCustomMarkerIcon, getMarkerColor, getMarkerSize } from '@/utils/leaflet-utils';
+import { createCustomMarkerIcon, getMarkerColor, getMarkerSize, createPinMarkerIcon } from '@/utils/leaflet-utils';
 
 export interface MapMarker {
   id: string | number;
@@ -12,6 +12,7 @@ export interface MapMarker {
   priority?: 'high' | 'medium' | 'low';
   date?: string;
   iconUrl?: string;
+  iconType?: 'default' | 'circle' | 'pin';
 }
 
 interface UseMapMarkersProps {
@@ -46,14 +47,20 @@ export const useMapMarkers = ({
 
       // Add new markers
       markers.forEach((marker) => {
-        const { position, title, status, id, type, priority, date } = marker;
+        const { position, title, status, id, type, priority, date, iconType } = marker;
 
-        // Get marker color and size based on status/priority
+        // Get marker color based on status/priority
         const markerColor = getMarkerColor(status, priority);
         const markerSize = getMarkerSize(priority);
         
-        // Create custom icon
-        const customIcon = createCustomMarkerIcon(markerColor, markerSize);
+        // Create icon based on iconType
+        let customIcon;
+        if (iconType === 'pin') {
+          customIcon = createPinMarkerIcon(markerColor);
+        } else {
+          // Default to circle icon
+          customIcon = createCustomMarkerIcon(markerColor, markerSize);
+        }
 
         // Add marker to map
         const mapMarker = L.marker(position, { icon: customIcon })

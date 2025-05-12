@@ -28,6 +28,24 @@ export const createCustomMarkerIcon = (markerColor: string, markerSize: number) 
   });
 };
 
+// Create pin marker icon (like the red pin in the image)
+export const createPinMarkerIcon = (color: string = '#ea384c', size: number = 30) => {
+  return L.divIcon({
+    className: 'custom-pin-icon',
+    html: `
+      <div style="position:relative;">
+        <svg width="${size}" height="${size * 1.5}" viewBox="0 0 100 150" xmlns="http://www.w3.org/2000/svg">
+          <path d="M50 0C29.86 0 13.5 16.36 13.5 36.5C13.5 65.06 50 100 50 100s36.5-34.94 36.5-63.5C86.5 16.36 70.14 0 50 0z" 
+                fill="${color}" stroke="white" stroke-width="5"/>
+          <circle cx="50" cy="36.5" r="13.5" fill="white"/>
+        </svg>
+      </div>
+    `,
+    iconSize: [size, size * 1.5],
+    iconAnchor: [size/2, size * 1.5]
+  });
+};
+
 // Create user location icon
 export const createUserLocationIcon = () => {
   return L.divIcon({

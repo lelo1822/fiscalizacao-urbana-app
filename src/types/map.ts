@@ -8,4 +8,5 @@ export interface MapMarker {
   priority?: 'high' | 'medium' | 'low';
   date?: string;
   iconUrl?: string;
+  iconType?: 'default' | 'circle' | 'pin';
 }
