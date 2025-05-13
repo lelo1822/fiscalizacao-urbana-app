@@ -43,21 +43,48 @@ export const useMapUserLocation = ({
       updateMarkerPosition(position);
     };
 
-    const setupGeolocation = () => {
+    const setupGeolocation = async () => {
       try {
         // Get initial location
         if (navigator.geolocation) {
+          // Check if we're in a secure context
+          if (window.isSecureContext) {
+            console.log("Running in secure context, geolocation should work");
+          } else {
+            console.warn("Not running in secure context, geolocation may be blocked");
+            toast({
+              title: "Alerta de localização",
+              description: "Para usar a localização, acesse o site via HTTPS",
+              variant: "warning"
+            });
+            return;
+          }
+          
           navigator.geolocation.getCurrentPosition(
             handlePositionUpdate,
-            (error) => handleLocationError(error, setPermissionDenied),
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            (error) => {
+              console.log("Erro na obtenção da posição inicial:", error);
+              handleLocationError(error, setPermissionDenied);
+            },
+            { 
+              enableHighAccuracy: true, 
+              timeout: 15000, 
+              maximumAge: 0 
+            }
           );
 
           // Set up watching
           watchId.current = navigator.geolocation.watchPosition(
             handlePositionUpdate,
-            (error) => handleLocationError(error, setPermissionDenied),
-            { enableHighAccuracy: true, timeout: 10000, maximumAge: 5000 }
+            (error) => {
+              console.log("Erro no watchPosition:", error);
+              handleLocationError(error, setPermissionDenied);
+            },
+            { 
+              enableHighAccuracy: true, 
+              timeout: 15000, 
+              maximumAge: 5000 
+            }
           );
         } else {
           throw new Error('Geolocation is not supported by this browser');
@@ -71,6 +98,7 @@ export const useMapUserLocation = ({
     // Set up geolocation watching only if not previously denied
     if (!permissionDenied && navigator.geolocation) {
       checkLocationPermission().then(permissionState => {
+        console.log("Current location permission state:", permissionState);
         if (permissionState === "granted" || permissionState === "prompt") {
           setupGeolocation();
         } else if (permissionState === "denied") {
@@ -90,7 +118,7 @@ export const useMapUserLocation = ({
       cleanupMarkers();
       isInitialized.current = false;
     };
-  }, [showUserLocation, isMapReady, isMobile, mapInstance, permissionDenied, updateMarkerPosition]);
+  }, [showUserLocation, isMapReady, isMobile, mapInstance, permissionDenied, updateMarkerPosition, cleanupMarkers]);
 
   // Function to center map on user location
   const centerOnUser = () => {
@@ -114,7 +142,11 @@ export const useMapUserLocation = ({
             variant: "destructive"
           });
         },
-        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+        { 
+          enableHighAccuracy: true, 
+          timeout: 15000, 
+          maximumAge: 0 
+        }
       );
     } else if (permissionDenied) {
       toast({
