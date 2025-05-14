@@ -10,7 +10,8 @@ export const useWeather = () => {
     setWeatherInfo({
       temperature: 24,
       condition: "Parcialmente nublado",
-      icon: "⛅"
+      icon: "⛅",
+      location: "São Paulo, SP"
     });
   }, []);
 

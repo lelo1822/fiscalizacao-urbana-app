@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useContext } from 'react';
+
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardHeader from './DashboardHeader';
 import MapSection from './MapSection';
@@ -8,6 +9,9 @@ import TasksSection from './TasksSection';
 import CategoriesSection from './CategoriesSection';
 import { useAuth } from '@/context/AuthContext';
 import { DashboardStats, Report, StatItem, Task, Category, WeatherInfo } from '@/types/dashboard';
+import { useWeather } from '@/hooks/useWeather';
+import { MapMarker } from '@/types/map';
+import { toast } from '@/hooks/use-toast';
 
 // Mock data for demonstration
 const mockReports: Report[] = [
@@ -68,6 +72,18 @@ const mockCategories: Category[] = [
   { id: 4, name: 'Poda de árvore', icon: '🌳' }
 ];
 
+// Convert reports to map markers
+const reportsToMapMarkers = (reports: Report[]): MapMarker[] => {
+  return reports.map(report => ({
+    id: report.id,
+    position: report.coordinates || [-23.55052, -46.633308],
+    title: report.type,
+    description: report.description,
+    status: report.status,
+    type: report.type,
+  }));
+};
+
 const DashboardContainer = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -76,28 +92,13 @@ const DashboardContainer = () => {
   const [statItems, setStatItems] = useState<StatItem[]>(mockStatItems);
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [categories, setCategories] = useState<Category[]>(mockCategories);
-  const [weatherInfo, setWeatherInfo] = useState<WeatherInfo | null>(null);
-
-  useEffect(() => {
-    // Fetch weather data
-    // In a real app, this would be an API call
-    const fetchWeatherData = async () => {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      setWeatherInfo({
-        temperature: 28,
-        condition: 'Ensolarado',
-        icon: '☀️',
-        location: 'São Paulo, SP'
-      });
-    };
-
-    fetchWeatherData();
-  }, []);
+  const [isLoading, setIsLoading] = useState(false);
+  const weatherInfo = useWeather();
+  const [mapMarkers, setMapMarkers] = useState<MapMarker[]>(reportsToMapMarkers(mockReports));
+  const [userPosition, setUserPosition] = useState<[number, number] | null>([-23.55052, -46.633308]);
 
   const handleCategoryClick = (categoryName: string) => {
-    navigate('/report', { state: { category: categoryName } });
+    navigate('/report/new', { state: { category: categoryName } });
   };
 
   const handleTaskToggle = (taskId: number) => {
@@ -108,27 +109,48 @@ const DashboardContainer = () => {
     );
   };
 
+  const handleViewReportDetails = (reportId: number) => {
+    navigate(`/report/${reportId}`);
+  };
+
+  const handleMarkerClick = (marker: MapMarker) => {
+    toast({
+      title: marker.title,
+      description: marker.description,
+    });
+  };
+
   return (
     <div className="container mx-auto px-4 py-8">
       <DashboardHeader 
-        userName={user?.name || "Usuário"}
+        isLoading={isLoading} 
         weatherInfo={{
-          temperature: weatherInfo?.temperature || 0,
+          temp: weatherInfo?.temperature || 0,
           condition: weatherInfo?.condition || "",
           icon: weatherInfo?.icon || ""
         }}
-        stats={stats as any}
       />
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
         <div className="lg:col-span-2 space-y-6">
-          <MapSection reports={reports} />
-          <StatisticsSection statItems={statItems} />
-          <RecentReportsSection reports={reports} />
+          <MapSection 
+            mapMarkers={mapMarkers}
+            userPosition={userPosition}
+            onMarkerClick={handleMarkerClick}
+          />
+          <StatisticsSection stats={statItems} />
+          <RecentReportsSection 
+            reports={reports} 
+            onViewDetails={handleViewReportDetails}
+            isLoading={isLoading}
+          />
         </div>
         
         <div className="space-y-6">
-          <TasksSection tasks={tasks} onTaskToggle={handleTaskToggle} />
+          <TasksSection 
+            tasks={tasks} 
+            onTaskToggle={handleTaskToggle} 
+          />
           <CategoriesSection 
             categories={categories} 
             onCategoryClick={handleCategoryClick} 
