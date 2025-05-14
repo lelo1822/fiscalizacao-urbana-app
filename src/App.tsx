@@ -9,11 +9,10 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import MapView from "./pages/MapView";
 import ReportForm from "./pages/ReportForm";
 import ReportDetail from "./pages/ReportDetail";
+import ReportsList from "./pages/ReportsList"; // Nova página
 import Profile from "./pages/Profile";
-import RouteHistory from "./pages/RouteHistory";
 import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
 import NotFound from "./pages/NotFound";
@@ -33,11 +32,10 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/map" element={<ProtectedRoute><MapView /></ProtectedRoute>} />
+            <Route path="/reports" element={<ProtectedRoute><ReportsList /></ProtectedRoute>} />
             <Route path="/report/new" element={<ProtectedRoute><ReportForm /></ProtectedRoute>} />
             <Route path="/report/:id" element={<ProtectedRoute><ReportDetail /></ProtectedRoute>} />
             <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
-            <Route path="/routes" element={<ProtectedRoute><RouteHistory /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><Settings /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>

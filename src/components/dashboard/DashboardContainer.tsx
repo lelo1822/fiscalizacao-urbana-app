@@ -1,16 +1,16 @@
 import { useNavigate } from "react-router-dom";
 import Layout from "../Layout";
-import LocationTracker from "@/components/LocationTracker";
 import { useDashboardData } from "@/hooks/useDashboardData";
 
 // Import refactored components
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import StatisticsSection from "@/components/dashboard/StatisticsSection";
-import MapSection from "@/components/dashboard/MapSection";
 import TasksSection from "@/components/dashboard/TasksSection";
-import NearbyIssuesSection from "@/components/dashboard/NearbyIssuesSection";
 import QuickReportSection from "@/components/dashboard/QuickReportSection";
 import RecentReportsSection from "@/components/dashboard/RecentReportsSection";
+import { Button } from "@/components/ui/button";
+import { FileText } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 const DashboardContainer = () => {
   const navigate = useNavigate();
@@ -19,11 +19,8 @@ const DashboardContainer = () => {
     dailyTasks,
     reportCategories,
     recentReports,
-    nearbyIssues,
-    userPosition,
     weatherInfo,
     isLoading,
-    mapMarkers,
     handleQuickReport,
     handleViewReport,
     setIsLoading
@@ -32,15 +29,6 @@ const DashboardContainer = () => {
   const handleQuickReportClick = async (categoryName: string) => {
     await handleQuickReport(categoryName);
     navigate('/report/new', { state: { category: categoryName } });
-  };
-
-  // Update the marker click handler to match the expected type
-  const handleMapMarkerClick = (marker: any) => {
-    // Extract the ID from the marker and pass it to handleViewReport
-    handleViewReport(Number(marker.id))
-      .then(() => {
-        navigate(`/report/${marker.id}`);
-      });
   };
 
   // Keep the handleViewReportClick function for other components
@@ -60,20 +48,32 @@ const DashboardContainer = () => {
         <StatisticsSection stats={stats} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          <MapSection 
-            mapMarkers={mapMarkers} 
-            userPosition={userPosition} 
-            onMarkerClick={handleMapMarkerClick} 
-          />
+          {/* Substituindo o MapSection por um card de acesso rápido aos relatórios */}
+          <Card className="lg:col-span-2 hover:shadow-md transition-shadow">
+            <CardHeader className="pb-3">
+              <CardTitle>Gerenciamento de Ocorrências</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="p-6 text-center space-y-4">
+                <p className="text-muted-foreground">
+                  Acesse a lista completa de ocorrências do seu gabinete e exporte relatórios em Excel
+                </p>
+                <div className="flex justify-center mt-4">
+                  <Button 
+                    size="lg"
+                    onClick={() => navigate('/reports')}
+                    className="gap-2"
+                  >
+                    <FileText className="h-5 w-5" />
+                    Ver Todas as Ocorrências
+                  </Button>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
           
           <TasksSection initialTasks={dailyTasks} />
         </div>
-
-        <NearbyIssuesSection 
-          issues={nearbyIssues} 
-          onViewDetails={handleViewReportClick} 
-          isLoading={isLoading} 
-        />
 
         <QuickReportSection 
           categories={reportCategories} 
@@ -87,7 +87,6 @@ const DashboardContainer = () => {
           isLoading={isLoading} 
         />
       </div>
-      <LocationTracker />
     </Layout>
   );
 };

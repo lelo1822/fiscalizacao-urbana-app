@@ -1,46 +1,32 @@
+import { Complainant } from './complainant';
 
-// Dashboard data types
 export interface Report {
   id: number;
   type: string;
+  description: string;
   address: string;
-  date: string;
-  status: string;
-  priority: string;
-  position: [number, number];
+  coordinates?: { lat: number, lng: number };
+  status: 'Pendente' | 'Em andamento' | 'Resolvido';
+  createdAt: string;
+  updatedAt?: string;
+  photos?: string[];
+  agent?: {
+    id: string;
+    name: string;
+    gabineteId: string;
+  };
+  complainant?: Complainant;
 }
 
-export interface Task {
+export interface DashboardStats {
+  totalReports: number;
+  pendingReports: number;
+  inProgressReports: number;
+  resolvedReports: number;
+}
+
+export interface DailyTask {
   id: number;
-  title: string;
+  description: string;
   completed: boolean;
-  time: string;
-}
-
-export interface Category {
-  id: number;
-  name: string;
-  icon: string;
-}
-
-export interface StatItem {
-  label: string;
-  value: number;
-  trend: "up" | "down";
-  percent: number;
-}
-
-export interface WeatherInfo {
-  temp: number;
-  condition: string;
-  icon: string;
-}
-
-export interface MapMarker {
-  id: number | string;
-  position: [number, number];
-  title: string;
-  type: string;
-  status: "pending" | "in_progress" | "resolved";
-  priority: "high" | "medium" | "low";
 }

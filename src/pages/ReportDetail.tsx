@@ -1,13 +1,10 @@
-
 import { useParams, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Clock, FileText, ArrowUp, User, Phone, Home } from "lucide-react";
-import LocationTracker from "@/components/LocationTracker";
-import ReportLocationMap from "@/components/ReportLocationMap";
+import { FileText, ArrowUp, User, Phone, Home } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -111,7 +108,7 @@ const ReportDetail = () => {
               <span className="text-gray-500 text-sm">{report.type}</span>
             </div>
           </div>
-          <div className="mt-4 md:mt-0">
+          <div className="mt-4 md:mt-0 flex gap-2">
             <Button 
               variant="outline"
               onClick={() => navigate(-1)}
@@ -119,6 +116,12 @@ const ReportDetail = () => {
             >
               <ArrowUp className="mr-2 h-4 w-4 rotate-90" />
               Voltar
+            </Button>
+            <Button 
+              variant="outline"
+              onClick={() => navigate("/reports")}
+            >
+              Ver Lista
             </Button>
           </div>
         </div>
@@ -137,24 +140,14 @@ const ReportDetail = () => {
                 </TabsList>
                 
                 <TabsContent value="occurrence" className="space-y-6 pt-4">
-                  {/* Location Information */}
+                  {/* Location Information - sem mapa agora */}
                   <div className="space-y-2">
                     <div className="flex items-center text-sm text-muted-foreground">
-                      <MapPin className="h-4 w-4 mr-2" />
-                      <span>Localização</span>
+                      <Home className="h-4 w-4 mr-2" />
+                      <span>Endereço</span>
                     </div>
-                    <div>
+                    <div className="bg-gray-50 p-4 rounded-md">
                       <p>{report.address}</p>
-                      <p className="text-sm text-muted-foreground mt-1">
-                        Coordenadas: {report.coordinates.lat.toFixed(6)}, {report.coordinates.lng.toFixed(6)}
-                      </p>
-                      <div className="mt-3">
-                        <ReportLocationMap 
-                          latitude={report.coordinates.lat}
-                          longitude={report.coordinates.lng}
-                          height="200px"
-                        />
-                      </div>
                     </div>
                   </div>
                   
@@ -295,7 +288,6 @@ const ReportDetail = () => {
           </Card>
         </div>
       </div>
-      <LocationTracker />
     </Layout>
   );
 };

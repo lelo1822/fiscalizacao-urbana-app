@@ -1,235 +1,125 @@
 
-import { useState, useEffect } from "react";
-import { NavLink, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
-import { cn } from "@/lib/utils";
+import { useState } from "react";
+import { useLocation, Link, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { useToast } from "@/components/ui/use-toast";
-import { 
-  MapPin, 
-  BarChart3, 
-  FileText, 
-  User, 
-  Camera,
+import {
+  LayoutDashboard,
+  FileText,
+  Settings,
   LogOut,
-  Menu,
-  X,
-  Settings
+  ChevronLeft,
+  User,
 } from "lucide-react";
-import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible";
+import { useAuth } from "@/context/AuthContext";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const Sidebar = () => {
-  const { user, logout } = useAuth();
-  const { toast } = useToast();
+  const navigate = useNavigate();
   const location = useLocation();
-  const [isCollapsed, setIsCollapsed] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { user, logout } = useAuth();
+  const [collapsed, setCollapsed] = useState(false);
 
-  // Feche o menu móvel ao navegar para uma nova rota
-  useEffect(() => {
-    if (isMobileMenuOpen) {
-      setIsMobileMenuOpen(false);
-    }
-  }, [location.pathname]);
-
-  const toggleSidebar = () => {
-    setIsCollapsed(!isCollapsed);
-    
-    toast({
-      description: isCollapsed ? "Menu expandido" : "Menu recolhido",
-      duration: 1500,
-    });
+  // Função para obter as iniciais do nome do usuário
+  const getUserInitials = () => {
+    if (!user?.name) return "U";
+    return user.name
+      .split(" ")
+      .map((n) => n[0])
+      .join("")
+      .toUpperCase()
+      .substring(0, 2);
   };
 
-  const toggleMobileMenu = () => {
-    setIsMobileMenuOpen(!isMobileMenuOpen);
+  const MenuItem = ({
+    to,
+    icon,
+    label,
+  }: {
+    to: string;
+    icon: React.ReactNode;
+    label: string;
+  }) => {
+    const isActive = location.pathname === to;
+
+    return (
+      <Link
+        to={to}
+        className={`flex items-center space-x-3 p-2 rounded-md transition-colors ${
+          isActive
+            ? "bg-primary text-white"
+            : "hover:bg-primary/10 text-gray-800"
+        }`}
+      >
+        {icon}
+        {!collapsed && <span>{label}</span>}
+      </Link>
+    );
   };
 
   const handleLogout = () => {
-    setIsLoggingOut(true);
-    
-    // Simular um pequeno delay para feedback visual
-    toast({
-      title: "Saindo da aplicação",
-      description: "Você será redirecionado em instantes...",
-    });
-    
-    setTimeout(() => {
-      logout();
-      setIsLoggingOut(false);
-    }, 800);
+    logout();
+    navigate("/login");
   };
 
-  const navItems = [
-    {
-      name: "Dashboard",
-      path: "/dashboard",
-      icon: <BarChart3 className="h-5 w-5" />,
-    },
-    {
-      name: "Mapa",
-      path: "/map",
-      icon: <MapPin className="h-5 w-5" />,
-    },
-    {
-      name: "Nova Ocorrência",
-      path: "/report/new",
-      icon: <Camera className="h-5 w-5" />,
-    },
-    {
-      name: "Histórico de Rotas",
-      path: "/routes",
-      icon: <FileText className="h-5 w-5" />,
-    },
-    {
-      name: "Perfil",
-      path: "/profile",
-      icon: <User className="h-5 w-5" />,
-    },
-    {
-      name: "Configurações",
-      path: "/settings",
-      icon: <Settings className="h-5 w-5" />,
-    },
-  ];
-
   return (
-    <>
-      {/* Mobile Menu Toggle Button */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
-        <Button 
-          variant="outline" 
-          size="icon"
-          className="bg-white shadow-md"
-          onClick={toggleMobileMenu}
-          aria-label={isMobileMenuOpen ? "Fechar menu" : "Abrir menu"}
+    <div
+      className={`border-r flex flex-col ${
+        collapsed ? "w-16" : "w-64"
+      } transition-all duration-300 h-screen sticky top-0 bg-white shrink-0`}
+    >
+      <div className="flex justify-between items-center p-4 border-b">
+        {!collapsed && (
+          <div>
+            <h1 className="text-lg font-bold text-primary">CityReport</h1>
+          </div>
+        )}
+        <button
+          onClick={() => setCollapsed((prev) => !prev)}
+          className="rounded-full p-1 hover:bg-gray-100"
         >
-          {isMobileMenuOpen ? <X className="h-5 w-5" /> : <Menu className="h-5 w-5" />}
-        </Button>
+          <ChevronLeft
+            className={`h-5 w-5 transition-transform ${
+              collapsed ? "rotate-180" : ""
+            }`}
+          />
+        </button>
       </div>
-      
-      {/* Mobile Sidebar */}
-      <div className={cn(
-        "fixed inset-0 bg-black/50 z-40 md:hidden transition-opacity duration-300",
-        isMobileMenuOpen ? "opacity-100" : "opacity-0 pointer-events-none"
-      )}>
-        <div className={cn(
-          "fixed top-0 left-0 h-full w-64 bg-white shadow-lg transition-transform transform duration-300 ease-in-out",
-          isMobileMenuOpen ? "translate-x-0" : "-translate-x-full"
-        )}>
-          <div className="p-4">
-            <div className="flex items-center justify-between mb-8">
-              <h2 className="text-xl font-bold text-primary">CidadeMon</h2>
-              <Button 
-                variant="ghost" 
-                size="icon"
-                onClick={toggleMobileMenu}
-                aria-label="Fechar menu"
-              >
-                <X className="h-5 w-5" />
-              </Button>
-            </div>
-            {renderSidebarContent()}
-          </div>
-        </div>
-      </div>
-      
-      {/* Desktop Sidebar */}
-      <aside className={cn(
-        "fixed top-0 left-0 h-full bg-white shadow-lg transition-all duration-300 ease-in-out hidden md:block",
-        isCollapsed ? "w-16" : "w-64"
-      )}>
-        <div className="p-4">
-          <div className="flex items-center justify-between mb-8">
-            {!isCollapsed && (
-              <h2 className="text-xl font-bold text-primary">CidadeMon</h2>
-            )}
-            <Button 
-              variant="ghost" 
-              size="icon"
-              onClick={toggleSidebar}
-              className={isCollapsed ? "mx-auto" : ""}
-              aria-label={isCollapsed ? "Expandir menu" : "Recolher menu"}
-            >
-              <Menu className="h-5 w-5" />
-            </Button>
-          </div>
-          {renderSidebarContent()}
-        </div>
-      </aside>
-    </>
-  );
 
-  function renderSidebarContent() {
-    return (
-      <>
-        {/* User Info */}
-        <div className="mb-8">
-          {!isCollapsed && (
-            <>
-              <div className="flex items-center space-x-3 mb-2">
-                <div className="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center font-semibold">
-                  {user?.name.charAt(0)}
-                </div>
-                <div>
-                  <p className="text-sm font-medium">{user?.name}</p>
-                  <p className="text-xs text-gray-500">{user?.role === 'admin' ? 'Administrador' : 'Agente'}</p>
-                </div>
-              </div>
-            </>
+      <div className="flex flex-col flex-1 overflow-y-auto py-6 px-2 space-y-2">
+        <MenuItem to="/dashboard" icon={<LayoutDashboard size={20} />} label="Dashboard" />
+        <MenuItem to="/reports" icon={<FileText size={20} />} label="Ocorrências" />
+        <MenuItem to="/profile" icon={<User size={20} />} label="Perfil" />
+        <MenuItem to="/settings" icon={<Settings size={20} />} label="Configurações" />
+      </div>
+
+      <div className="border-t p-4">
+        <div className="flex items-center mb-4">
+          <Avatar className="h-10 w-10">
+            <AvatarImage src={user?.avatarUrl} />
+            <AvatarFallback className="bg-primary text-white">
+              {getUserInitials()}
+            </AvatarFallback>
+          </Avatar>
+          {!collapsed && (
+            <div className="ml-3 overflow-hidden">
+              <p className="text-sm font-medium truncate">{user?.name}</p>
+              <p className="text-xs text-muted-foreground truncate">
+                Gabinete {user?.gabineteId || "Admin"}
+              </p>
+            </div>
           )}
         </div>
-        
-        {/* Navigation Links */}
-        <nav>
-          <ul className="space-y-2">
-            {navItems.map((item) => (
-              <li key={item.path}>
-                <NavLink 
-                  to={item.path}
-                  className={({ isActive }) => cn(
-                    "flex items-center py-2 px-3 rounded-lg transition-colors",
-                    isActive 
-                      ? "bg-primary text-white" 
-                      : "text-gray-700 hover:bg-gray-100",
-                    isCollapsed ? "justify-center" : "",
-                    "transition-all duration-200"
-                  )}
-                >
-                  {item.icon}
-                  {!isCollapsed && (
-                    <span className="ml-3 transition-opacity duration-200">{item.name}</span>
-                  )}
-                </NavLink>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        
-        {/* Logout Button */}
-        <div className="absolute bottom-4 left-0 right-0 px-4">
-          <Button 
-            variant="ghost" 
-            className={cn(
-              "text-gray-700 hover:bg-gray-100 w-full flex items-center",
-              isCollapsed ? "justify-center" : "",
-              "transition-all duration-200"
-            )}
-            onClick={handleLogout}
-            disabled={isLoggingOut}
-          >
-            {isLoggingOut ? (
-              <span className="h-5 w-5 border-2 border-gray-500 border-t-transparent rounded-full animate-spin"></span>
-            ) : (
-              <LogOut className="h-5 w-5" />
-            )}
-            {!isCollapsed && <span className="ml-3">Sair</span>}
-          </Button>
-        </div>
-      </>
-    );
-  }
+        <Button
+          variant="outline"
+          className={`border-gray-300 ${collapsed ? "p-2 w-full" : ""}`}
+          onClick={handleLogout}
+        >
+          <LogOut className="h-4 w-4" />
+          {!collapsed && <span className="ml-2">Sair</span>}
+        </Button>
+      </div>
+    </div>
+  );
 };
 
 export default Sidebar;

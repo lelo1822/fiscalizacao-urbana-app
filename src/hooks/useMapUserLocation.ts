@@ -1,3 +1,4 @@
+
 import { useEffect, useRef, useState } from 'react';
 import L from 'leaflet';
 import { toast } from "@/hooks/use-toast";
@@ -54,7 +55,7 @@ export const useMapUserLocation = ({
             toast({
               title: "Alerta de localização",
               description: "Para usar a localização, acesse o site via HTTPS",
-              variant: "warning"
+              variant: "default" // Alterado de "warning" para "default"
             });
             return;
           }
