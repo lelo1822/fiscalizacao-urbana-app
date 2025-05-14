@@ -1,5 +1,5 @@
 
-import { Report, Task, Category, StatItem } from "@/types/dashboard";
+import { Report, StatItem, Task, Category } from "@/types/dashboard";
 
 // Mock data for statistics
 export const mockStats: StatItem[] = [
@@ -32,37 +32,37 @@ export const mockRecentReports: Report[] = [
   { 
     id: 1, 
     type: "Buraco na via", 
+    description: "Buraco grande no meio da pista",
     address: "Rua das Flores, 123", 
-    date: "2023-05-08", 
+    createdAt: "2023-05-08T10:30:00", 
     status: "Pendente",
-    priority: "high",
-    position: [-23.55152, -46.633408] as [number, number],
+    coordinates: { lat: -23.55152, lng: -46.633408 }
   },
   { 
     id: 2, 
     type: "Árvore caída", 
+    description: "Árvore caída bloqueando a passagem",
     address: "Av. Principal, 456", 
-    date: "2023-05-07", 
-    status: "Em análise",
-    priority: "medium",
-    position: [-23.54550, -46.638100] as [number, number],
+    createdAt: "2023-05-07T08:45:00",  
+    status: "Em andamento",
+    coordinates: { lat: -23.54550, lng: -46.638100 }
   },
   { 
     id: 3, 
     type: "Lâmpada queimada", 
+    description: "Lâmpada queimada há dias",
     address: "Praça Central", 
-    date: "2023-05-06", 
+    createdAt: "2023-05-06T16:20:00", 
     status: "Resolvido",
-    priority: "low",
-    position: [-23.56052, -46.629708] as [number, number],
+    coordinates: { lat: -23.56052, lng: -46.629708 }
   },
   { 
     id: 4, 
     type: "Lixo acumulado", 
+    description: "Lixo acumulado em via pública",
     address: "Rua Lateral, 789", 
-    date: "2023-05-05", 
+    createdAt: "2023-05-05T11:15:00",
     status: "Resolvido",
-    priority: "medium",
-    position: [-23.55552, -46.641308] as [number, number],
+    coordinates: { lat: -23.55552, lng: -46.641308 }
   },
 ];

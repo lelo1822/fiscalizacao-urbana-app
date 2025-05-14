@@ -3,14 +3,8 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { FileText } from "lucide-react";
 import { useNavigate } from "react-router-dom";
-
-interface Report {
-  id: number;
-  type: string;
-  address: string;
-  date: string;
-  status: string;
-}
+import { Report } from "@/types/dashboard";
+import { format } from "date-fns";
 
 interface RecentReportsSectionProps {
   reports: Report[];
@@ -20,6 +14,16 @@ interface RecentReportsSectionProps {
 
 const RecentReportsSection = ({ reports, onViewDetails, isLoading }: RecentReportsSectionProps) => {
   const navigate = useNavigate();
+  
+  // Format date function
+  const formatDate = (dateString: string) => {
+    try {
+      const date = new Date(dateString);
+      return format(date, 'dd/MM/yyyy');
+    } catch (error) {
+      return dateString;
+    }
+  };
   
   return (
     <Card className="hover:shadow-md transition-shadow">
@@ -43,12 +47,12 @@ const RecentReportsSection = ({ reports, onViewDetails, isLoading }: RecentRepor
                 <tr key={report.id} className="border-b hover:bg-gray-50 transition-colors">
                   <td className="py-3 px-2">{report.type}</td>
                   <td className="py-3 px-2">{report.address}</td>
-                  <td className="py-3 px-2">{report.date}</td>
+                  <td className="py-3 px-2">{formatDate(report.createdAt)}</td>
                   <td className="py-3 px-2">
                     <span className={`inline-block px-2 py-1 text-xs rounded-full ${
-                      report.status === "Resolvido" ? "bg-success/20 text-success" : 
-                      report.status === "Em análise" ? "bg-warning/20 text-warning" :
-                      "bg-secondary/20 text-secondary"
+                      report.status === "Resolvido" ? "bg-green-100 text-green-800" : 
+                      report.status === "Em andamento" ? "bg-amber-100 text-amber-800" :
+                      "bg-blue-100 text-blue-800"
                     }`}>
                       {report.status}
                     </span>
@@ -72,12 +76,12 @@ const RecentReportsSection = ({ reports, onViewDetails, isLoading }: RecentRepor
         <div className="mt-4 text-center">
           <Button 
             variant="outline"
-            onClick={() => navigate('/map')}
+            onClick={() => navigate('/reports')}
             className="border-primary text-primary hover:bg-primary/10"
             disabled={isLoading}
           >
             <FileText className="mr-2 h-4 w-4" />
-            Ver todos os relatórios
+            Ver todas as ocorrências
           </Button>
         </div>
       </CardContent>

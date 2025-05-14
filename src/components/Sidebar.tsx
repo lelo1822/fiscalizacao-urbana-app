@@ -95,7 +95,7 @@ const Sidebar = () => {
       <div className="border-t p-4">
         <div className="flex items-center mb-4">
           <Avatar className="h-10 w-10">
-            <AvatarImage src={user?.avatarUrl} />
+            <AvatarImage src={user?.photoURL || undefined} />
             <AvatarFallback className="bg-primary text-white">
               {getUserInitials()}
             </AvatarFallback>
