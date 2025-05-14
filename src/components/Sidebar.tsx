@@ -70,7 +70,7 @@ const Sidebar = () => {
       <div className="flex justify-between items-center p-4 border-b">
         {!collapsed && (
           <div>
-            <h1 className="text-lg font-bold text-primary">CityReport</h1>
+            <h1 className="text-lg font-bold text-primary">Câmara na Rua</h1>
           </div>
         )}
         <button
