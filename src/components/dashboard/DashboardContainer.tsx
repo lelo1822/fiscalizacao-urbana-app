@@ -1,93 +1,141 @@
-import { useNavigate } from "react-router-dom";
-import Layout from "../Layout";
-import { useDashboardData } from "@/hooks/useDashboardData";
+import React, { useState, useEffect, useContext } from 'react';
+import { useNavigate } from 'react-router-dom';
+import DashboardHeader from './DashboardHeader';
+import MapSection from './MapSection';
+import StatisticsSection from './StatisticsSection';
+import RecentReportsSection from './RecentReportsSection';
+import TasksSection from './TasksSection';
+import CategoriesSection from './CategoriesSection';
+import { useAuth } from '@/context/AuthContext';
+import { DashboardStats, Report, StatItem, Task, Category, WeatherInfo } from '@/types/dashboard';
 
-// Import refactored components
-import DashboardHeader from "@/components/dashboard/DashboardHeader";
-import StatisticsSection from "@/components/dashboard/StatisticsSection";
-import TasksSection from "@/components/dashboard/TasksSection";
-import QuickReportSection from "@/components/dashboard/QuickReportSection";
-import RecentReportsSection from "@/components/dashboard/RecentReportsSection";
-import { Button } from "@/components/ui/button";
-import { FileText } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+// Mock data for demonstration
+const mockReports: Report[] = [
+  {
+    id: 1,
+    type: 'Buraco na via',
+    description: 'Buraco grande na avenida principal',
+    address: 'Av. Brasil, 1500',
+    status: 'Pendente',
+    createdAt: '2023-06-15T10:30:00',
+    photos: ['/images/pothole.jpg']
+  },
+  {
+    id: 2,
+    type: 'Lâmpada queimada',
+    description: 'Poste com lâmpada queimada há 3 dias',
+    address: 'Rua das Flores, 123',
+    status: 'Em andamento',
+    createdAt: '2023-06-14T08:15:00',
+    photos: ['/images/streetlight.jpg']
+  },
+  {
+    id: 3,
+    type: 'Lixo/Entulho',
+    description: 'Acúmulo de lixo na calçada',
+    address: 'Rua dos Pinheiros, 456',
+    status: 'Resolvido',
+    createdAt: '2023-06-10T14:45:00',
+    updatedAt: '2023-06-12T09:20:00',
+    photos: ['/images/trash.jpg']
+  }
+];
+
+const mockStats: DashboardStats = {
+  totalReports: 48,
+  pendingReports: 15,
+  inProgressReports: 10,
+  resolvedReports: 23
+};
+
+const mockStatItems: StatItem[] = [
+  { label: 'Novas ocorrências', value: 12, trend: 'up', percent: 8 },
+  { label: 'Resolvidas', value: 23, trend: 'up', percent: 12 },
+  { label: 'Tempo médio', value: 36, trend: 'down', percent: 5 }
+];
+
+const mockTasks: Task[] = [
+  { id: 1, title: 'Verificar ocorrência #1234', completed: false, time: '10:00' },
+  { id: 2, title: 'Atualizar status da ocorrência #1230', completed: true, time: '11:30' },
+  { id: 3, title: 'Responder ao cidadão sobre #1228', completed: false, time: '14:00' },
+  { id: 4, title: 'Reunião com equipe de manutenção', completed: false, time: '15:30' }
+];
+
+const mockCategories: Category[] = [
+  { id: 1, name: 'Buraco na via', icon: '🚧' },
+  { id: 2, name: 'Lâmpada queimada', icon: '💡' },
+  { id: 3, name: 'Lixo/Entulho', icon: '🗑️' },
+  { id: 4, name: 'Poda de árvore', icon: '🌳' }
+];
 
 const DashboardContainer = () => {
+  const { user } = useAuth();
   const navigate = useNavigate();
-  const {
-    stats,
-    dailyTasks,
-    reportCategories,
-    recentReports,
-    weatherInfo,
-    isLoading,
-    handleQuickReport,
-    handleViewReport,
-    setIsLoading
-  } = useDashboardData();
+  const [reports, setReports] = useState<Report[]>(mockReports);
+  const [stats, setStats] = useState<DashboardStats>(mockStats);
+  const [statItems, setStatItems] = useState<StatItem[]>(mockStatItems);
+  const [tasks, setTasks] = useState<Task[]>(mockTasks);
+  const [categories, setCategories] = useState<Category[]>(mockCategories);
+  const [weatherInfo, setWeatherInfo] = useState<WeatherInfo | null>(null);
 
-  const handleQuickReportClick = async (categoryName: string) => {
-    await handleQuickReport(categoryName);
-    navigate('/report/new', { state: { category: categoryName } });
+  useEffect(() => {
+    // Fetch weather data
+    // In a real app, this would be an API call
+    const fetchWeatherData = async () => {
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      
+      setWeatherInfo({
+        temperature: 28,
+        condition: 'Ensolarado',
+        icon: '☀️',
+        location: 'São Paulo, SP'
+      });
+    };
+
+    fetchWeatherData();
+  }, []);
+
+  const handleCategoryClick = (categoryName: string) => {
+    navigate('/report', { state: { category: categoryName } });
   };
 
-  // Keep the handleViewReportClick function for other components
-  const handleViewReportClick = async (reportId: number) => {
-    await handleViewReport(reportId);
-    navigate(`/report/${reportId}`);
+  const handleTaskToggle = (taskId: number) => {
+    setTasks(prevTasks =>
+      prevTasks.map(task =>
+        task.id === taskId ? { ...task, completed: !task.completed } : task
+      )
+    );
   };
 
   return (
-    <Layout>
-      <div className="p-4 md:p-8">
-        <DashboardHeader 
-          isLoading={isLoading} 
-          weatherInfo={weatherInfo} 
-        />
-
-        <StatisticsSection stats={stats} />
-
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          {/* Substituindo o MapSection por um card de acesso rápido aos relatórios */}
-          <Card className="lg:col-span-2 hover:shadow-md transition-shadow">
-            <CardHeader className="pb-3">
-              <CardTitle>Gerenciamento de Ocorrências</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="p-6 text-center space-y-4">
-                <p className="text-muted-foreground">
-                  Acesse a lista completa de ocorrências do seu gabinete e exporte relatórios em Excel
-                </p>
-                <div className="flex justify-center mt-4">
-                  <Button 
-                    size="lg"
-                    onClick={() => navigate('/reports')}
-                    className="gap-2"
-                  >
-                    <FileText className="h-5 w-5" />
-                    Ver Todas as Ocorrências
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
-          <TasksSection initialTasks={dailyTasks} />
+    <div className="container mx-auto px-4 py-8">
+      <DashboardHeader 
+        userName={user?.name || "Usuário"}
+        weatherInfo={{
+          temperature: weatherInfo?.temperature || 0,
+          condition: weatherInfo?.condition || "",
+          icon: weatherInfo?.icon || ""
+        }}
+        stats={stats as any}
+      />
+      
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
+        <div className="lg:col-span-2 space-y-6">
+          <MapSection reports={reports} />
+          <StatisticsSection statItems={statItems} />
+          <RecentReportsSection reports={reports} />
         </div>
-
-        <QuickReportSection 
-          categories={reportCategories} 
-          onCategorySelect={handleQuickReportClick} 
-          isLoading={isLoading} 
-        />
-
-        <RecentReportsSection 
-          reports={recentReports} 
-          onViewDetails={handleViewReportClick} 
-          isLoading={isLoading} 
-        />
+        
+        <div className="space-y-6">
+          <TasksSection tasks={tasks} onTaskToggle={handleTaskToggle} />
+          <CategoriesSection 
+            categories={categories} 
+            onCategoryClick={handleCategoryClick} 
+          />
+        </div>
       </div>
-    </Layout>
+    </div>
   );
 };
 

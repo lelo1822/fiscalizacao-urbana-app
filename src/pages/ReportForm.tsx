@@ -3,11 +3,11 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { toast } from "sonner";
+import { toast } from "@/hooks/use-toast";
 import { Complainant } from "@/types/complainant";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Import our new components
+// Import our components
 import LocationSection from "@/components/report-form/LocationSection";
 import IssueTypeSection from "@/components/report-form/IssueTypeSection";
 import DescriptionSection from "@/components/report-form/DescriptionSection";
@@ -38,7 +38,6 @@ const ReportForm = () => {
   const [issueType, setIssueType] = useState(state?.category || "");
   const [description, setDescription] = useState("");
   const [address, setAddress] = useState("");
-  const [currentLocation, setCurrentLocation] = useState<{lat: number, lng: number} | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
@@ -58,33 +57,6 @@ const ReportForm = () => {
     complainantName: "",
     complainantPhone: "",
     complainantAddress: ""
-  });
-
-  // Obter localização atual quando o componente é montado
-  useState(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setCurrentLocation({
-            lat: position.coords.latitude,
-            lng: position.coords.longitude
-          });
-          
-          // Em um app real, você usaria geocodificação reversa aqui
-          // Para fins de demonstração, vamos apenas definir um endereço simulado
-          setAddress("Detectando endereço...");
-          setTimeout(() => {
-            setAddress("Av. Brasil, próximo ao número 1500");
-          }, 1500);
-        },
-        (error) => {
-          console.error("Erro ao obter localização:", error);
-          toast.error("Não foi possível obter sua localização atual");
-        }
-      );
-    } else {
-      toast.error("Geolocalização não é suportada pelo seu navegador");
-    }
   });
 
   const handleComplainantChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -144,7 +116,11 @@ const ReportForm = () => {
     e.preventDefault();
     
     if (!validateForm()) {
-      toast.error("Preencha todos os campos obrigatórios");
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Preencha todos os campos obrigatórios"
+      });
       return;
     }
     
@@ -155,11 +131,18 @@ const ReportForm = () => {
       // Simulando chamada de API
       await new Promise(resolve => setTimeout(resolve, 1500));
       
-      toast.success("Ocorrência registrada com sucesso!");
+      toast({
+        title: "Sucesso",
+        description: "Ocorrência registrada com sucesso!"
+      });
       navigate("/dashboard");
     } catch (error) {
       console.error("Erro ao enviar ocorrência:", error);
-      toast.error("Erro ao registrar ocorrência. Tente novamente.");
+      toast({
+        variant: "destructive",
+        title: "Erro",
+        description: "Erro ao registrar ocorrência. Tente novamente."
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -185,7 +168,6 @@ const ReportForm = () => {
                   <LocationSection 
                     address={address}
                     setAddress={setAddress}
-                    currentLocation={currentLocation}
                   />
 
                   {/* Issue Type Section */}
@@ -230,7 +212,7 @@ const ReportForm = () => {
               {/* Submit Button */}
               <SubmitButton 
                 isSubmitting={isSubmitting} 
-                disabled={!currentLocation || photos.length === 0}
+                disabled={photos.length === 0}
               />
             </form>
           </CardContent>
