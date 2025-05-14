@@ -23,3 +23,5 @@ export function useToast() {
     dismiss: (toastId?: string) => toast.dismiss(toastId),
   }
 }
+
+export { toast }
