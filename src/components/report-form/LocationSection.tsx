@@ -2,6 +2,7 @@
 import { MapPin } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
+import { FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 interface LocationSectionProps {
   address: string;
@@ -19,11 +20,11 @@ const LocationSection = ({ address, setAddress }: LocationSectionProps) => {
         <Input 
           value={address} 
           onChange={(e) => setAddress(e.target.value)}
-          placeholder="Digite o endereço completo da ocorrência"
+          placeholder="Rua, número, bairro - ex: Av. Paulista, 1000, Bela Vista"
           required
         />
         <p className="text-sm text-muted-foreground mt-2">
-          Informe o endereço completo onde ocorreu o problema.
+          Informe o endereço completo onde ocorreu o problema (rua, número e bairro).
         </p>
       </div>
     </div>
