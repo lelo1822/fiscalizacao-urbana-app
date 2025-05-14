@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth, GABINETES } from "../context/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -11,20 +11,38 @@ import { useToast } from "@/components/ui/use-toast";
 
 const Register = () => {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { register, getGabineteUsers } = useAuth();
   const { toast } = useToast();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [role, setRole] = useState<"admin" | "agent">("agent");
+  const [role, setRole] = useState<"admin" | "agent" | "vereador">("agent");
+  const [gabineteId, setGabineteId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [formErrors, setFormErrors] = useState({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
+    gabinete: "",
   });
+  
+  // Estado para mostrar informação sobre a capacidade do gabinete selecionado
+  const [gabineteInfo, setGabineteInfo] = useState<{ vereadores: number, assessores: number } | null>(null);
+
+  // Atualizar informações do gabinete quando um gabinete é selecionado
+  const handleGabineteChange = (value: string) => {
+    setGabineteId(value);
+    // Limpar erro se houver
+    if (formErrors.gabinete) {
+      setFormErrors(prev => ({ ...prev, gabinete: "" }));
+    }
+    
+    // Obter informações atuais do gabinete
+    const info = getGabineteUsers(value);
+    setGabineteInfo(info);
+  };
 
   const validateForm = () => {
     let isValid = true;
@@ -33,6 +51,7 @@ const Register = () => {
       email: "",
       password: "",
       confirmPassword: "",
+      gabinete: "",
     };
 
     // Validação do nome
@@ -64,6 +83,12 @@ const Register = () => {
       errors.confirmPassword = "As senhas não coincidem";
       isValid = false;
     }
+    
+    // Validação do gabinete
+    if (!gabineteId) {
+      errors.gabinete = "Selecione um gabinete";
+      isValid = false;
+    }
 
     setFormErrors(errors);
     return isValid;
@@ -85,7 +110,7 @@ const Register = () => {
     setIsLoading(true);
 
     try {
-      const success = await register(name, email, password, role);
+      const success = await register(name, email, password, role, gabineteId);
       if (success) {
         toast({
           title: "Cadastro realizado com sucesso",
@@ -205,7 +230,7 @@ const Register = () => {
                 <Label htmlFor="role">Função</Label>
                 <Select 
                   value={role} 
-                  onValueChange={(value) => setRole(value as "admin" | "agent")}
+                  onValueChange={(value) => setRole(value as "admin" | "agent" | "vereador")}
                   disabled={isLoading}
                 >
                   <SelectTrigger>
@@ -213,9 +238,46 @@ const Register = () => {
                   </SelectTrigger>
                   <SelectContent position="popper" className="bg-white">
                     <SelectItem value="admin">Administrador</SelectItem>
-                    <SelectItem value="agent">Agente</SelectItem>
+                    <SelectItem value="agent">Assessor</SelectItem>
+                    <SelectItem value="vereador">Vereador</SelectItem>
                   </SelectContent>
                 </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="gabinete">Gabinete</Label>
+                <Select 
+                  value={gabineteId} 
+                  onValueChange={handleGabineteChange}
+                  disabled={isLoading}
+                >
+                  <SelectTrigger className={formErrors.gabinete ? "border-destructive" : ""}>
+                    <SelectValue placeholder="Selecione um gabinete" />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className="bg-white">
+                    {GABINETES.map(gabinete => (
+                      <SelectItem key={gabinete.id} value={gabinete.id}>
+                        {gabinete.nome}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {formErrors.gabinete && (
+                  <p className="text-destructive text-xs mt-1">{formErrors.gabinete}</p>
+                )}
+                
+                {/* Informações sobre a capacidade do gabinete */}
+                {gabineteInfo && (
+                  <div className="mt-2 text-xs text-muted-foreground">
+                    <p>Vereadores: {gabineteInfo.vereadores}/1</p>
+                    <p>Assessores: {gabineteInfo.assessores}/8</p>
+                    {role === "vereador" && gabineteInfo.vereadores >= 1 && (
+                      <p className="text-destructive">Este gabinete já possui um vereador cadastrado</p>
+                    )}
+                    {role === "agent" && gabineteInfo.assessores >= 8 && (
+                      <p className="text-destructive">Este gabinete já atingiu o limite de assessores</p>
+                    )}
+                  </div>
+                )}
               </div>
               <Button 
                 type="submit" 

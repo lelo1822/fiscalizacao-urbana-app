@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { MapPin, Clock, FileText, ArrowUp } from "lucide-react";
+import { MapPin, Clock, FileText, ArrowUp, User, Phone, Home } from "lucide-react";
 import LocationTracker from "@/components/LocationTracker";
 import ReportLocationMap from "@/components/ReportLocationMap";
+import { useAuth } from "@/context/AuthContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
-// Mock report data (in a real app, this would come from an API)
+// Dados simulados da ocorrência (em um app real, isso viria de uma API)
 const mockReportData = {
   id: "1",
   type: "Buraco na via",
@@ -24,7 +26,14 @@ const mockReportData = {
   ],
   agent: {
     name: "Agente Silva",
-    id: "2"
+    id: "2",
+    gabineteId: "1"
+  },
+  complainant: {
+    fullName: "Maria da Silva",
+    phone: "(11) 98765-4321",
+    whatsapp: "(11) 98765-4321",
+    address: "Av. Paulista, 1000 - Bela Vista"
   },
   updates: [
     { 
@@ -38,11 +47,15 @@ const mockReportData = {
 const ReportDetail = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   
-  // In a real app, you would fetch the report data using the ID
+  // Em um app real, você buscaria os dados da ocorrência usando o ID
   const report = mockReportData;
   
-  // Format date for display
+  // Verificar se o usuário tem acesso a esta ocorrência
+  const hasAccess = user?.gabineteId === report.agent.gabineteId || user?.role === 'admin';
+  
+  // Formatar data para exibição
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     return date.toLocaleDateString('pt-BR', {
@@ -54,6 +67,29 @@ const ReportDetail = () => {
       minute: '2-digit'
     });
   };
+
+  if (!hasAccess) {
+    return (
+      <Layout>
+        <div className="p-4 md:p-8">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="text-center py-8">
+                <h2 className="text-xl font-bold text-destructive">Acesso Negado</h2>
+                <p className="mt-2">Você não tem permissão para visualizar esta ocorrência.</p>
+                <Button 
+                  onClick={() => navigate("/dashboard")}
+                  className="mt-4"
+                >
+                  Voltar para o Dashboard
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
@@ -94,64 +130,120 @@ const ReportDetail = () => {
               <CardTitle>Detalhes da Ocorrência</CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
-              {/* Location Information */}
-              <div className="space-y-2">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <MapPin className="h-4 w-4 mr-2" />
-                  <span>Localização</span>
-                </div>
-                <div>
-                  <p>{report.address}</p>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Coordenadas: {report.coordinates.lat.toFixed(6)}, {report.coordinates.lng.toFixed(6)}
-                  </p>
-                  <div className="mt-3">
-                    <ReportLocationMap 
-                      latitude={report.coordinates.lat}
-                      longitude={report.coordinates.lng}
-                      height="200px"
-                    />
-                  </div>
-                </div>
-              </div>
-              
-              {/* Date Information */}
-              <div className="space-y-2">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <Clock className="h-4 w-4 mr-2" />
-                  <span>Data e Hora</span>
-                </div>
-                <div>
-                  <p>{formatDate(report.date)}</p>
-                </div>
-              </div>
-              
-              {/* Description */}
-              <div className="space-y-2">
-                <div className="flex items-center text-sm text-muted-foreground">
-                  <FileText className="h-4 w-4 mr-2" />
-                  <span>Descrição</span>
-                </div>
-                <div className="bg-gray-50 p-4 rounded-md">
-                  <p>{report.description}</p>
-                </div>
-              </div>
-              
-              {/* Photos */}
-              <div className="space-y-4">
-                <h3 className="text-sm font-medium">Fotos</h3>
-                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                  {report.photos.map((photo, index) => (
-                    <div key={index} className="aspect-square rounded-md overflow-hidden border">
-                      <img 
-                        src={photo} 
-                        alt={`Foto ${index + 1}`} 
-                        className="w-full h-full object-cover"
-                      />
+              <Tabs defaultValue="occurrence">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="occurrence">Ocorrência</TabsTrigger>
+                  <TabsTrigger value="complainant">Dados do Reclamante</TabsTrigger>
+                </TabsList>
+                
+                <TabsContent value="occurrence" className="space-y-6 pt-4">
+                  {/* Location Information */}
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <MapPin className="h-4 w-4 mr-2" />
+                      <span>Localização</span>
                     </div>
-                  ))}
-                </div>
-              </div>
+                    <div>
+                      <p>{report.address}</p>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        Coordenadas: {report.coordinates.lat.toFixed(6)}, {report.coordinates.lng.toFixed(6)}
+                      </p>
+                      <div className="mt-3">
+                        <ReportLocationMap 
+                          latitude={report.coordinates.lat}
+                          longitude={report.coordinates.lng}
+                          height="200px"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Date Information */}
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Clock className="h-4 w-4 mr-2" />
+                      <span>Data e Hora</span>
+                    </div>
+                    <div>
+                      <p>{formatDate(report.date)}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Description */}
+                  <div className="space-y-2">
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <FileText className="h-4 w-4 mr-2" />
+                      <span>Descrição</span>
+                    </div>
+                    <div className="bg-gray-50 p-4 rounded-md">
+                      <p>{report.description}</p>
+                    </div>
+                  </div>
+                  
+                  {/* Photos */}
+                  <div className="space-y-4">
+                    <h3 className="text-sm font-medium">Fotos</h3>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                      {report.photos.map((photo, index) => (
+                        <div key={index} className="aspect-square rounded-md overflow-hidden border">
+                          <img 
+                            src={photo} 
+                            alt={`Foto ${index + 1}`} 
+                            className="w-full h-full object-cover"
+                          />
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="complainant" className="space-y-6 pt-4">
+                  {/* Complainant Information */}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <User className="h-4 w-4 mr-2" />
+                        <span>Nome completo</span>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-md">
+                        <p>{report.complainant.fullName}</p>
+                      </div>
+                    </div>
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Phone className="h-4 w-4 mr-2" />
+                        <span>Telefone</span>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-md">
+                        <p>{report.complainant.phone}</p>
+                      </div>
+                    </div>
+                    
+                    {report.complainant.whatsapp && (
+                      <div className="space-y-2">
+                        <div className="flex items-center text-sm text-muted-foreground">
+                          <Phone className="h-4 w-4 mr-2" />
+                          <span>WhatsApp</span>
+                        </div>
+                        <div className="bg-gray-50 p-3 rounded-md">
+                          <p>{report.complainant.whatsapp}</p>
+                        </div>
+                      </div>
+                    )}
+                    
+                    <div className="space-y-2">
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        <Home className="h-4 w-4 mr-2" />
+                        <span>Endereço</span>
+                      </div>
+                      <div className="bg-gray-50 p-3 rounded-md">
+                        <p>{report.complainant.address}</p>
+                      </div>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </CardContent>
           </Card>
           
@@ -176,7 +268,7 @@ const ReportDetail = () => {
                   </div>
                 ))}
                 
-                {/* Status Update Form (in a real app, this would be a functional form) */}
+                {/* Status Update Form (em um app real, isso seria um formulário funcional) */}
                 <div className="border-t pt-4 mt-6">
                   <h4 className="font-medium mb-3">Adicionar Atualização</h4>
                   <textarea 
