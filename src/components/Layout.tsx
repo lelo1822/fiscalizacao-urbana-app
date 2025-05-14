@@ -14,7 +14,7 @@ const Layout = ({ children }: LayoutProps) => {
   const hideSidebar = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/';
   
   return (
-    <div className="flex min-h-screen bg-gray-50">
+    <div className="flex min-h-screen bg-background">
       {!hideSidebar && <Sidebar />}
       <main className={`flex-1 ${!hideSidebar ? 'md:ml-64' : ''}`}>
         {children}
