@@ -97,15 +97,15 @@ export default {
 				'pulse-beacon': {
 					'0%': {
 						transform: 'scale(0.95)',
-						boxShadow: '0 0 0 0 rgba(0, 123, 255, 0.7)'
+						boxShadow: '0 0 0 0 rgba(123, 58, 180, 0.7)'  // Updated to purple
 					},
 					'70%': {
 						transform: 'scale(1)',
-						boxShadow: '0 0 0 10px rgba(0, 123, 255, 0)'
+						boxShadow: '0 0 0 10px rgba(123, 58, 180, 0)'  // Updated to purple
 					},
 					'100%': {
 						transform: 'scale(0.95)',
-						boxShadow: '0 0 0 0 rgba(0, 123, 255, 0)'
+						boxShadow: '0 0 0 0 rgba(123, 58, 180, 0)'  // Updated to purple
 					}
 				}
 			},

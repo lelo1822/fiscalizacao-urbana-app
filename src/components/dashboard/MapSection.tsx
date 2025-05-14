@@ -188,7 +188,7 @@ const MapSection = ({ mapMarkers = [], userPosition, onMarkerClick }: MapSection
                 className={`transition-colors hover:bg-secondary/20 ${markerIconType === 'circle' ? 'bg-secondary/30' : ''}`}
               >
                 <div className="flex items-center">
-                  <span className="inline-block h-3 w-3 rounded-full bg-blue-500 mr-2"></span>
+                  <span className="inline-block h-3 w-3 rounded-full bg-primary mr-2"></span>
                   Circular
                 </div>
               </DropdownMenuItem>
@@ -197,7 +197,7 @@ const MapSection = ({ mapMarkers = [], userPosition, onMarkerClick }: MapSection
                 className={`transition-colors hover:bg-secondary/20 ${markerIconType === 'pin' ? 'bg-secondary/30' : ''}`}
               >
                 <div className="flex items-center">
-                  <MapPin className="h-4 w-4 mr-2 text-red-500" />
+                  <MapPin className="h-4 w-4 mr-2 text-primary" />
                   Seta
                 </div>
               </DropdownMenuItem>
@@ -219,15 +219,15 @@ const MapSection = ({ mapMarkers = [], userPosition, onMarkerClick }: MapSection
       </CardContent>
       <div className="p-3 border-t border-border flex flex-wrap gap-3 text-xs">
         <div className="flex items-center transition-transform hover:scale-105">
-          <span className="inline-block h-3 w-3 rounded-full bg-blue-500 mr-1.5"></span>
+          <span className="inline-block h-3 w-3 rounded-full bg-primary mr-1.5"></span>
           <span>Pendente</span>
         </div>
         <div className="flex items-center transition-transform hover:scale-105">
-          <span className="inline-block h-3 w-3 rounded-full bg-orange-500 mr-1.5"></span>
+          <span className="inline-block h-3 w-3 rounded-full bg-secondary mr-1.5"></span>
           <span>Em andamento</span>
         </div>
         <div className="flex items-center transition-transform hover:scale-105">
-          <span className="inline-block h-3 w-3 rounded-full bg-green-500 mr-1.5"></span>
+          <span className="inline-block h-3 w-3 rounded-full text-[#2575fc] mr-1.5">●</span>
           <span>Resolvido</span>
         </div>
         {activeFilters.length > 0 && (

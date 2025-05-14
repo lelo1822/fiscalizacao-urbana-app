@@ -33,11 +33,11 @@ const FloatingActionButton = ({ className }: FloatingActionButtonProps) => {
   };
 
   const actions = [
-    { label: "Nova Ocorrência", icon: Camera, path: "/report/new", color: "bg-success hover:bg-success/90 text-white" },
-    { label: "Mapa", icon: MapPin, path: "/map", color: "bg-blue-500 hover:bg-blue-600 text-white" },
-    { label: "Dashboard", icon: BarChart3, path: "/dashboard", color: "bg-violet-500 hover:bg-violet-600 text-white" },
-    { label: "Perfil", icon: User, path: "/profile", color: "bg-amber-500 hover:bg-amber-600 text-white" },
-    { label: "Configurações", icon: Settings, path: "/settings", color: "bg-slate-700 hover:bg-slate-800 text-white" },
+    { label: "Nova Ocorrência", icon: Camera, path: "/report/new", color: "bg-primary hover:bg-primary/90 text-white" },
+    { label: "Mapa", icon: MapPin, path: "/map", color: "bg-secondary hover:bg-secondary/90 text-white" },
+    { label: "Dashboard", icon: BarChart3, path: "/dashboard", color: "bg-[#8a4baf] hover:bg-[#7a3b9f] text-white" },
+    { label: "Perfil", icon: User, path: "/profile", color: "bg-[#9c6bbc] hover:bg-[#8c5bac] text-white" },
+    { label: "Configurações", icon: Settings, path: "/settings", color: "bg-[#6a11cb] hover:bg-[#5a01bb] text-white" },
   ];
 
   // Não mostrar o FAB na página inicial

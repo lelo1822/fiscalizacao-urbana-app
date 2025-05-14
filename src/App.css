@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -12,10 +13,10 @@
   transition: filter 300ms;
 }
 .logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
+  filter: drop-shadow(0 0 2em rgba(123, 58, 180, 0.67));
 }
 .logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+  filter: drop-shadow(0 0 2em rgba(97, 218, 251, 0.67));
 }
 
 @keyframes logo-spin {
@@ -39,4 +40,17 @@
 
 .read-the-docs {
   color: #888;
+}
+
+/* Purple theme styles */
+.purple-gradient {
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+}
+
+.purple-accent {
+  color: #6a11cb;
+}
+
+.bg-purple-gradient {
+  background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
 }
