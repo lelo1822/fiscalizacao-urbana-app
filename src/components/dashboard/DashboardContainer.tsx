@@ -7,8 +7,8 @@ import RecentReportsSection from './RecentReportsSection';
 import TasksSection from './TasksSection';
 import CategoriesSection from './CategoriesSection';
 import { useAuth } from '@/context/AuthContext';
-import { DashboardStats, Report, StatItem, Task, Category } from '@/types/dashboard';
 import { useWeather } from '@/hooks/useWeather';
+import { DashboardStats, Report, StatItem, Task, Category } from '@/types/dashboard';
 
 // Mock data for demonstration
 const mockReports: Report[] = [
