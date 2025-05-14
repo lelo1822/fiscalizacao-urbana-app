@@ -49,3 +49,28 @@ export const formatDateWithTime = (dateString: string) => {
     return dateString;
   }
 };
+
+// Funções adicionadas para resolver os erros
+export const reportToMapMarkers = (reports: Report[]): MapMarker[] => {
+  return reports
+    .filter(report => report.coordinates)
+    .map(report => ({
+      id: report.id,
+      position: [
+        report.coordinates?.lat || 0,
+        report.coordinates?.lng || 0
+      ],
+      popupContent: `
+        <div>
+          <h3>${report.type}</h3>
+          <p>${report.description}</p>
+          <p>Status: ${report.status}</p>
+        </div>
+      `,
+      type: report.status,
+    }));
+};
+
+export const simulateLoading = (ms = 500) => {
+  return new Promise(resolve => setTimeout(resolve, ms));
+};

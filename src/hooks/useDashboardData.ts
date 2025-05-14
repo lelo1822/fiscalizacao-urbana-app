@@ -1,12 +1,13 @@
 
 import { useState } from "react";
-import { Report } from "@/types/dashboard";
+import { Report, StatItem, Task, Category, WeatherInfo } from "@/types/dashboard";
 import { mockStats, mockDailyTasks, mockReportCategories, mockRecentReports } from "@/data/dashboardMockData";
 import { useWeather } from "./useWeather";
 import { useUserLocation } from "./useUserLocation";
 import { reportToMapMarkers, simulateLoading } from "@/utils/dashboard-utils";
+import type { MapMarker } from "@/types/map";
 
-export type { Report, Task, Category, StatItem, WeatherInfo, MapMarker } from "@/types/dashboard";
+export type { Report, Task, Category, StatItem, WeatherInfo };
 
 // Hook to handle all dashboard data
 export const useDashboardData = () => {

@@ -8,7 +8,7 @@ export const useWeather = () => {
   useEffect(() => {
     // Mock weather data (in a real app, this would be an API call)
     setWeatherInfo({
-      temp: 24,
+      temperature: 24,
       condition: "Parcialmente nublado",
       icon: "⛅"
     });

@@ -56,5 +56,5 @@ export interface WeatherInfo {
   temperature: number;
   condition: string;
   icon: string;
-  location: string;
+  location?: string;
 }

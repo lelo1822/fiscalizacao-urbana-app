@@ -1,4 +1,3 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
 import { toast } from "sonner";
 
@@ -14,6 +13,7 @@ interface User {
   email: string;
   role: 'admin' | 'agent' | 'vereador';
   gabineteId: string;
+  photoURL?: string; // Adicionado photoURL como opcional
 }
 
 interface AuthContextType {
