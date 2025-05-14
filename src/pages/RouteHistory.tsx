@@ -1,11 +1,9 @@
 
 import Layout from "../components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import LocationTracker from "@/components/LocationTracker";
 import { useRouteHistory } from "@/hooks/useRouteHistory";
 import AgentFilter from "@/components/route-history/AgentFilter";
 import RouteCalendar from "@/components/route-history/RouteCalendar";
-import RouteMapVisualization from "@/components/route-history/RouteMapVisualization";
 import RouteSummary from "@/components/route-history/RouteSummary";
 import RouteHistoryList from "@/components/route-history/RouteHistoryList";
 
@@ -16,7 +14,6 @@ const RouteHistory = () => {
     agentFilter, 
     setAgentFilter, 
     routeDays, 
-    selectedRoutePoints, 
     stopPoints, 
     isLoading,
     summary
@@ -42,12 +39,6 @@ const RouteHistory = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <RouteMapVisualization 
-              date={date}
-              routePoints={selectedRoutePoints}
-              isLoading={isLoading}
-            />
-
             <RouteSummary
               distance={summary.distance}
               duration={summary.duration}
@@ -72,7 +63,6 @@ const RouteHistory = () => {
           </div>
         </div>
       </div>
-      <LocationTracker />
     </Layout>
   );
 };

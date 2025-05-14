@@ -2,16 +2,13 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import DashboardHeader from './DashboardHeader';
-import MapSection from './MapSection';
 import StatisticsSection from './StatisticsSection';
 import RecentReportsSection from './RecentReportsSection';
 import TasksSection from './TasksSection';
-import CategoriesSection from '@/components/dashboard/CategoriesSection';
+import CategoriesSection from './CategoriesSection';
 import { useAuth } from '@/context/AuthContext';
-import { DashboardStats, Report, StatItem, Task, Category, WeatherInfo } from '@/types/dashboard';
+import { DashboardStats, Report, StatItem, Task, Category } from '@/types/dashboard';
 import { useWeather } from '@/hooks/useWeather';
-import { MapMarker } from '@/types/map';
-import { toast } from '@/hooks/use-toast';
 
 // Mock data for demonstration
 const mockReports: Report[] = [
@@ -22,8 +19,7 @@ const mockReports: Report[] = [
     address: 'Av. Brasil, 1500',
     status: 'Pendente',
     createdAt: '2023-06-15T10:30:00',
-    photos: ['/images/pothole.jpg'],
-    coordinates: { lat: -23.55152, lng: -46.633408 }
+    photos: ['/images/pothole.jpg']
   },
   {
     id: 2,
@@ -32,8 +28,7 @@ const mockReports: Report[] = [
     address: 'Rua das Flores, 123',
     status: 'Em andamento',
     createdAt: '2023-06-14T08:15:00',
-    photos: ['/images/streetlight.jpg'],
-    coordinates: { lat: -23.54550, lng: -46.638100 }
+    photos: ['/images/streetlight.jpg']
   },
   {
     id: 3,
@@ -43,8 +38,7 @@ const mockReports: Report[] = [
     status: 'Resolvido',
     createdAt: '2023-06-10T14:45:00',
     updatedAt: '2023-06-12T09:20:00',
-    photos: ['/images/trash.jpg'],
-    coordinates: { lat: -23.56052, lng: -46.629708 }
+    photos: ['/images/trash.jpg']
   }
 ];
 
@@ -75,21 +69,6 @@ const mockCategories: Category[] = [
   { id: 4, name: 'Poda de árvore', icon: '🌳' }
 ];
 
-// Convert reports to map markers
-const reportsToMapMarkers = (reports: Report[]): MapMarker[] => {
-  return reports
-    .filter(report => report.coordinates) // Only include reports with coordinates
-    .map(report => ({
-      id: report.id,
-      position: [report.coordinates!.lat, report.coordinates!.lng] as [number, number],
-      title: report.type,
-      status: report.status === 'Pendente' ? 'pending' : 
-              report.status === 'Em andamento' ? 'in_progress' : 'resolved',
-      type: report.type,
-      iconType: 'circle'
-    }));
-};
-
 const DashboardContainer = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -100,15 +79,6 @@ const DashboardContainer = () => {
   const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [isLoading, setIsLoading] = useState(false);
   const weatherInfo = useWeather();
-  const [mapMarkers, setMapMarkers] = useState<MapMarker[]>([]);
-  const [userPosition, setUserPosition] = useState<[number, number] | null>([-23.55052, -46.633308]);
-
-  // Initialize map markers
-  useEffect(() => {
-    if (reports && reports.length > 0) {
-      setMapMarkers(reportsToMapMarkers(reports));
-    }
-  }, [reports]);
 
   const handleCategoryClick = (categoryName: string) => {
     navigate('/report/new', { state: { category: categoryName } });
@@ -126,14 +96,6 @@ const DashboardContainer = () => {
     navigate(`/report/${reportId}`);
   };
 
-  const handleMarkerClick = (marker: MapMarker) => {
-    // Since description is not in MapMarker, we'll just show the title
-    toast({
-      title: marker.title || "Ocorrência",
-      description: `Tipo: ${marker.type || "Não especificado"}`,
-    });
-  };
-
   return (
     <div className="container mx-auto px-4 py-8">
       <DashboardHeader 
@@ -147,11 +109,6 @@ const DashboardContainer = () => {
       
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
         <div className="lg:col-span-2 space-y-6">
-          <MapSection 
-            mapMarkers={mapMarkers}
-            userPosition={userPosition}
-            onMarkerClick={handleMarkerClick}
-          />
           <StatisticsSection stats={statItems} />
           <RecentReportsSection 
             reports={reports} 

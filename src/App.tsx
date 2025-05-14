@@ -11,7 +11,7 @@ import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
 import ReportForm from "./pages/ReportForm";
 import ReportDetail from "./pages/ReportDetail";
-import ReportsList from "./pages/ReportsList"; // Nova página
+import ReportsList from "./pages/ReportsList";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";

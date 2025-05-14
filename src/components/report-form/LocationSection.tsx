@@ -2,7 +2,6 @@
 import { MapPin } from "lucide-react";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
-import { FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 
 interface LocationSectionProps {
   address: string;

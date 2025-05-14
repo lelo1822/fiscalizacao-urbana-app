@@ -1,6 +1,6 @@
 
-import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Category } from "@/types/dashboard";
 
 interface CategoriesSectionProps {
@@ -10,22 +10,21 @@ interface CategoriesSectionProps {
 
 const CategoriesSection = ({ categories, onCategoryClick }: CategoriesSectionProps) => {
   return (
-    <Card className="hover:shadow-md transition-shadow">
+    <Card>
       <CardHeader className="pb-3">
         <CardTitle>Categorias de Ocorrências</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-3">
           {categories.map((category) => (
-            <Button
+            <button
               key={category.id}
-              variant="outline"
-              className="h-auto py-3 flex flex-col items-center justify-center gap-2"
               onClick={() => onCategoryClick(category.name)}
+              className="flex flex-col items-center justify-center p-3 rounded-lg border border-border hover:border-primary/50 hover:bg-secondary/50 transition-colors"
             >
-              <span className="text-2xl">{category.icon}</span>
-              <span className="text-xs text-center">{category.name}</span>
-            </Button>
+              <span className="text-2xl mb-2">{category.icon}</span>
+              <span className="text-sm font-medium text-center">{category.name}</span>
+            </button>
           ))}
         </div>
       </CardContent>
