@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -22,16 +23,21 @@ interface MapSectionProps {
   onMarkerClick: (marker: MapMarker) => void;
 }
 
-const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps) => {
+const MapSection = ({ mapMarkers = [], userPosition, onMarkerClick }: MapSectionProps) => {
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [showTraffic, setShowTraffic] = useState(false);
-  const [filteredMarkers, setFilteredMarkers] = useState<MapMarker[]>(mapMarkers);
+  const [filteredMarkers, setFilteredMarkers] = useState<MapMarker[]>(mapMarkers || []);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [markerIconType, setMarkerIconType] = useState<'circle' | 'pin'>('circle');
   const [enableClustering, setEnableClustering] = useState(true);
 
+  // Make sure we update filtered markers when mapMarkers changes
+  useState(() => {
+    setFilteredMarkers(mapMarkers || []);
+  });
+
   // Count types of incidents for the filter menu
-  const incidentTypes = mapMarkers.reduce<Record<string, number>>((acc, marker) => {
+  const incidentTypes = (mapMarkers || []).reduce<Record<string, number>>((acc, marker) => {
     const type = marker.type || 'Não categorizado';
     acc[type] = (acc[type] || 0) + 1;
     return acc;
@@ -47,7 +53,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
     
     // Apply filters to markers
     if (newFilters.length === 0) {
-      setFilteredMarkers(mapMarkers);
+      setFilteredMarkers(mapMarkers || []);
       if (activeFilters.length > 0) {
         toast({
           title: "Filtros removidos",
@@ -56,7 +62,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
         });
       }
     } else {
-      const filtered = mapMarkers.filter(marker => 
+      const filtered = (mapMarkers || []).filter(marker => 
         newFilters.includes(marker.type || 'Não categorizado')
       );
       setFilteredMarkers(filtered);
@@ -90,7 +96,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
     setMarkerIconType(type);
     
     // Apply the icon type to all markers
-    const updatedMarkers = filteredMarkers.map(marker => ({
+    const updatedMarkers = (filteredMarkers || []).map(marker => ({
       ...marker,
       iconType: type
     }));
@@ -202,7 +208,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
       <CardContent className="p-0">
         <LeafletMap 
           height="320px"
-          markers={filteredMarkers}
+          markers={filteredMarkers || []}
           showUserLocation={true}
           onMarkerClick={onMarkerClick}
           center={userPosition || [-23.55052, -46.633308]}
@@ -231,7 +237,7 @@ const MapSection = ({ mapMarkers, userPosition, onMarkerClick }: MapSectionProps
             className="h-5 text-xs ml-auto transition-colors hover:bg-red-50 hover:text-red-600"
             onClick={() => {
               setActiveFilters([]);
-              setFilteredMarkers(mapMarkers);
+              setFilteredMarkers(mapMarkers || []);
               toast({
                 title: "Filtros limpos",
                 description: "Mostrando todas as ocorrências",

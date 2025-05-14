@@ -1,84 +1,42 @@
 
-import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { Check } from "lucide-react";
-import { useToast } from "@/hooks/use-toast";
-
-interface Task {
-  id: number;
-  title: string;
-  completed: boolean;
-  time: string;
-}
+import { Checkbox } from "@/components/ui/checkbox";
+import { Task } from "@/types/dashboard";
 
 interface TasksSectionProps {
-  initialTasks: Task[];
+  taskList: Task[];
+  onTaskToggle: (taskId: number) => void;
 }
 
-const TasksSection = ({ initialTasks }: TasksSectionProps) => {
-  const { toast } = useToast();
-  const [tasks, setTasks] = useState(initialTasks);
-
-  // Marcar tarefa como concluída com feedback visual
-  const toggleTaskCompleted = (taskId: number) => {
-    setTasks(tasks.map(task => {
-      if (task.id === taskId) {
-        const newStatus = !task.completed;
-        
-        // Mostrar toast confirmando a ação
-        toast({
-          title: newStatus ? "Tarefa concluída" : "Tarefa reaberta",
-          description: newStatus ? "A tarefa foi marcada como concluída." : "A tarefa foi marcada como pendente.",
-          variant: newStatus ? "default" : "destructive",
-        });
-        
-        return { ...task, completed: newStatus };
-      }
-      return task;
-    }));
-  };
-
+const TasksSection = ({ taskList, onTaskToggle }: TasksSectionProps) => {
   return (
     <Card className="hover:shadow-md transition-shadow">
-      <CardHeader className="pb-3">
-        <CardTitle>Tarefas do Dia</CardTitle>
+      <CardHeader className="pb-2">
+        <CardTitle>Tarefas</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {tasks.map((task) => (
-            <div 
-              key={task.id} 
-              className={`flex items-center justify-between p-3 border rounded-md ${
-                task.completed ? 'bg-gray-50 border-gray-200' : 'bg-white border-gray-200'
-              } transition-colors duration-200 hover:border-primary/30`}
-            >
-              <div className="flex items-center space-x-3">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  className={`h-6 w-6 rounded-full p-0 ${
-                    task.completed ? 'bg-primary text-white' : 'bg-transparent text-gray-400'
+          {taskList.map((task) => (
+            <div key={task.id} className="flex items-start space-x-2">
+              <Checkbox 
+                id={`task-${task.id}`}
+                checked={task.completed}
+                onCheckedChange={() => onTaskToggle(task.id)}
+                className="mt-1"
+              />
+              <div className="grid gap-1 leading-none">
+                <label
+                  htmlFor={`task-${task.id}`}
+                  className={`text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 ${
+                    task.completed ? 'line-through text-muted-foreground' : ''
                   }`}
-                  onClick={() => toggleTaskCompleted(task.id)}
                 >
-                  {task.completed && <Check className="h-3 w-3" />}
-                </Button>
-                <div>
-                  <p className={`font-medium ${task.completed ? 'line-through text-gray-400' : ''}`}>
-                    {task.title}
-                  </p>
-                  <p className="text-xs text-gray-500">{task.time}</p>
-                </div>
+                  {task.title}
+                </label>
+                <p className="text-xs text-muted-foreground">{task.time}</p>
               </div>
             </div>
           ))}
-          
-          {tasks.filter(t => !t.completed).length === 0 && (
-            <p className="text-center text-sm text-muted-foreground py-4">
-              Todas as tarefas foram concluídas! 🎉
-            </p>
-          )}
         </div>
       </CardContent>
     </Card>

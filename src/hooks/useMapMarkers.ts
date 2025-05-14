@@ -32,7 +32,7 @@ interface UseMapMarkersProps {
 export const useMapMarkers = ({
   mapInstance,
   markersLayer,
-  markers,
+  markers = [],
   isMapReady,
   onMarkerClick,
   showHeatmap,
@@ -50,6 +50,9 @@ export const useMapMarkers = ({
       return;
     }
 
+    // Ensure markers is an array
+    const safeMarkers = Array.isArray(markers) ? markers : [];
+    
     try {
       // Clear existing markers
       markersLayer.current.clearLayers();
@@ -101,63 +104,65 @@ export const useMapMarkers = ({
         }
       }
 
-      // Add new markers
-      markers.forEach((marker) => {
-        const { position, title, status, id, type, priority, date, iconType, cluster = true } = marker;
+      // Add new markers only if we have any
+      if (safeMarkers.length > 0) {
+        safeMarkers.forEach((marker) => {
+          const { position, title, status, id, type, priority, date, iconType, cluster = true } = marker;
 
-        // Get marker color based on status/priority
-        const markerColor = getMarkerColor(status, priority);
-        const markerSize = getMarkerSize(priority);
-        
-        // Create icon based on iconType
-        let customIcon;
-        if (iconType === 'pin') {
-          customIcon = createPinMarkerIcon(markerColor);
-        } else {
-          // Default to circle icon
-          customIcon = createCustomMarkerIcon(markerColor, markerSize);
-        }
-
-        // Create the marker with status in options for cluster reference
-        const mapMarker = L.marker(position, { 
-          icon: customIcon,
-          // @ts-ignore - Adding status for cluster reference
-          status: status 
-        });
-
-        // Add popup if title or type is available
-        if (title || type) {
-          const formattedDate = date ? new Date(date).toLocaleString('pt-BR') : '';
+          // Get marker color based on status/priority
+          const markerColor = getMarkerColor(status, priority);
+          const markerSize = getMarkerSize(priority);
           
-          const popupContent = `
-            <div class="popup-content">
-              <h3 class="font-bold">${title || type || 'Ocorrência'}</h3>
-              ${type && title ? `<p>${type}</p>` : ''}
-              ${date ? `<p class="text-xs mt-1">${formattedDate}</p>` : ''}
-              <p class="text-xs mt-1">${status === 'resolved' ? 'Resolvido' : 
-                status === 'in_progress' ? 'Em andamento' : 'Pendente'}</p>
-            </div>
-          `;
-          mapMarker.bindPopup(popupContent);
-        }
+          // Create icon based on iconType
+          let customIcon;
+          if (iconType === 'pin') {
+            customIcon = createPinMarkerIcon(markerColor);
+          } else {
+            // Default to circle icon
+            customIcon = createCustomMarkerIcon(markerColor, markerSize);
+          }
 
-        // Add click handler if provided
-        if (onMarkerClick) {
-          mapMarker.on('click', () => {
-            onMarkerClick(marker);
+          // Create the marker with status in options for cluster reference
+          const mapMarker = L.marker(position, { 
+            icon: customIcon,
+            // @ts-ignore - Adding status for cluster reference
+            status: status 
           });
-        }
 
-        // Add marker either to cluster or directly to map based on config
-        if (enableClustering && cluster && markerClusterGroup.current) {
-          markerClusterGroup.current.addLayer(mapMarker);
-        } else {
-          markersLayer.current!.addLayer(mapMarker);
-        }
-      });
+          // Add popup if title or type is available
+          if (title || type) {
+            const formattedDate = date ? new Date(date).toLocaleString('pt-BR') : '';
+            
+            const popupContent = `
+              <div class="popup-content">
+                <h3 class="font-bold">${title || type || 'Ocorrência'}</h3>
+                ${type && title ? `<p>${type}</p>` : ''}
+                ${date ? `<p class="text-xs mt-1">${formattedDate}</p>` : ''}
+                <p class="text-xs mt-1">${status === 'resolved' ? 'Resolvido' : 
+                  status === 'in_progress' ? 'Em andamento' : 'Pendente'}</p>
+              </div>
+            `;
+            mapMarker.bindPopup(popupContent);
+          }
+
+          // Add click handler if provided
+          if (onMarkerClick) {
+            mapMarker.on('click', () => {
+              onMarkerClick(marker);
+            });
+          }
+
+          // Add marker either to cluster or directly to map based on config
+          if (enableClustering && cluster && markerClusterGroup.current) {
+            markerClusterGroup.current.addLayer(mapMarker);
+          } else if (markersLayer.current) {
+            markersLayer.current.addLayer(mapMarker);
+          }
+        });
+      }
 
       // Add heatmap if requested and markers are available
-      if (showHeatmap && markers.length > 0 && mapInstance.current && (window as any).L.heatLayer) {
+      if (showHeatmap && safeMarkers.length > 0 && mapInstance.current && (window as any).L.heatLayer) {
         try {
           // Find and remove existing heatmaps before adding a new one
           if (mapInstance.current) {
@@ -174,7 +179,7 @@ export const useMapMarkers = ({
           }
           
           // Create heatmap data
-          const heatData = markers.map(m => [...m.position, 0.5]); // Latitude, Longitude, Intensity
+          const heatData = safeMarkers.map(m => [...m.position, 0.5]); // Latitude, Longitude, Intensity
           
           // Add new heatmap layer
           (window as any).L.heatLayer(heatData, {
