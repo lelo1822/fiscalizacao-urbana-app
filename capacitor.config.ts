@@ -6,7 +6,7 @@ const config: CapacitorConfig = {
   appName: 'fiscalizacao-urbana-app',
   webDir: 'dist',
   server: {
-    url: "https://3aa6ae4b-c665-426c-b088-9b374d8fb80d.lovableproject.com?forceHideBadge=true",
+    url: "https://3aa6ae4bc665426cb0889b374d8fb80d.lovable.app?forceHideBadge=true",
     cleartext: true
   },
   plugins: {
