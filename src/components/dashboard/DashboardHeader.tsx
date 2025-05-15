@@ -1,7 +1,7 @@
 
 import { useAuth } from "@/context/AuthContext";
 import { Button } from "@/components/ui/button";
-import { Camera, MapPin } from "lucide-react";
+import { Camera } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -39,7 +39,7 @@ const DashboardHeader = ({ isLoading, weatherInfo }: DashboardHeaderProps) => {
           {todayDate} • {weatherInfo?.temp}°C {weatherInfo?.icon} {weatherInfo?.condition}
         </p>
       </div>
-      <div className="mt-4 md:mt-0 flex gap-2">
+      <div className="mt-4 md:mt-0">
         <Button 
           onClick={() => navigate('/report/new')}
           className="bg-success hover:bg-success/90"
@@ -47,15 +47,6 @@ const DashboardHeader = ({ isLoading, weatherInfo }: DashboardHeaderProps) => {
         >
           <Camera className="mr-2 h-4 w-4" />
           Nova Ocorrência
-        </Button>
-        <Button 
-          variant="outline"
-          onClick={() => navigate('/map')}
-          className="border-primary text-primary hover:bg-primary/10"
-          disabled={isLoading}
-        >
-          <MapPin className="mr-2 h-4 w-4" />
-          Ver Mapa
         </Button>
       </div>
     </div>
