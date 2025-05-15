@@ -10,7 +10,7 @@ import { useAuth } from '@/context/AuthContext';
 import { useWeather } from '@/hooks/useWeather';
 import { DashboardStats, Report, StatItem, Task, Category } from '@/types/dashboard';
 
-// Mock data for demonstration
+// Dados simulados para demonstração
 const mockReports: Report[] = [
   {
     id: 1,
