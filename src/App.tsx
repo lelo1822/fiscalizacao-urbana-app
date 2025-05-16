@@ -9,6 +9,7 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
+import MapPage from "./pages/Map";
 import ReportForm from "./pages/ReportForm";
 import ReportDetail from "./pages/ReportDetail";
 import ReportsList from "./pages/ReportsList";
@@ -32,6 +33,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
+            <Route path="/map" element={<ProtectedRoute><MapPage /></ProtectedRoute>} />
             <Route path="/reports" element={<ProtectedRoute><ReportsList /></ProtectedRoute>} />
             <Route path="/report/new" element={<ProtectedRoute><ReportForm /></ProtectedRoute>} />
             <Route path="/report/:id" element={<ProtectedRoute><ReportDetail /></ProtectedRoute>} />
