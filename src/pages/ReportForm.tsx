@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
 import { Complainant } from "@/types/complainant";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "../context/AuthContext";
+import { addReport } from "@/services/reportService";
 
 // Import our components
 import LocationSection from "@/components/report-form/LocationSection";
@@ -33,6 +35,7 @@ interface LocationState {
 const ReportForm = () => {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
   const state = location.state as LocationState;
   
   const [issueType, setIssueType] = useState(state?.category || "");
@@ -40,6 +43,7 @@ const ReportForm = () => {
   const [address, setAddress] = useState("");
   const [photos, setPhotos] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [coordinates, setCoordinates] = useState<{lat: number, lng: number} | null>(null);
   
   // Estado para informações do reclamante
   const [complainant, setComplainant] = useState<Complainant>({
@@ -58,6 +62,23 @@ const ReportForm = () => {
     complainantPhone: "",
     complainantAddress: ""
   });
+
+  // Usar a geolocalização para definir as coordenadas quando o endereço for inserido
+  const handleAddressChange = (value: string) => {
+    setAddress(value);
+    
+    // Em um aplicativo real, você usaria um serviço de geocodificação para obter coordenadas precisas
+    // Aqui estamos apenas simulando com dados aleatórios próximos a São Paulo
+    if (value) {
+      // Coordenadas de São Paulo com pequena variação aleatória
+      const baseLat = -23.55052;
+      const baseLng = -46.633308;
+      setCoordinates({
+        lat: baseLat + (Math.random() * 0.1 - 0.05), 
+        lng: baseLng + (Math.random() * 0.1 - 0.05)
+      });
+    }
+  };
 
   const handleComplainantChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -127,9 +148,25 @@ const ReportForm = () => {
     setIsSubmitting(true);
     
     try {
-      // Em um app real, você enviaria os dados para um servidor aqui
-      // Simulando chamada de API
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      // Criar o objeto de relatório
+      const newReport = {
+        type: issueType,
+        description: description,
+        address: address,
+        coordinates: coordinates || { lat: 0, lng: 0 },
+        status: "Pendente",
+        createdAt: new Date().toISOString(),
+        complainant: complainant,
+        photos: photos,
+        agent: user ? {
+          id: user.id,
+          name: user.name,
+          gabineteId: user.gabineteId
+        } : undefined
+      };
+      
+      // Adicionar o relatório usando o serviço
+      addReport(newReport);
       
       toast({
         title: "Sucesso",
@@ -148,6 +185,7 @@ const ReportForm = () => {
     }
   };
 
+  // Modifique o JSX para passar handleAddressChange para o LocationSection
   return (
     <Layout>
       <div className="p-4 md:p-8">
@@ -164,10 +202,10 @@ const ReportForm = () => {
                 </TabsList>
                 
                 <TabsContent value="occurrence" className="space-y-6 pt-4">
-                  {/* Location Section */}
+                  {/* Location Section - modificado para aceitar handleAddressChange */}
                   <LocationSection 
                     address={address}
-                    setAddress={setAddress}
+                    setAddress={handleAddressChange}
                   />
 
                   {/* Issue Type Section */}

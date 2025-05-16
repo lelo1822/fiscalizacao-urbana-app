@@ -1,23 +1,57 @@
 
-import { Report, StatItem, Task, Category } from "@/types/dashboard";
+import { StatItem, Task, Category } from "@/types/dashboard";
+import { getFilteredReports } from "@/services/reportService";
 
-// Mock data for statistics
-export const mockStats: StatItem[] = [
-  { label: "Ocorrências Total", value: 128, trend: "up", percent: 12 },
-  { label: "Resolvidas", value: 87, trend: "up", percent: 8 },
-  { label: "Em andamento", value: 41, trend: "down", percent: 5 },
-  { label: "Últimas 24h", value: 12, trend: "up", percent: 50 },
-];
+// Dados estatísticos calculados dinamicamente
+export const getStats = (): StatItem[] => {
+  const allReports = getFilteredReports("all");
+  const resolvedReports = getFilteredReports("resolved");
+  const inProgressReports = getFilteredReports("in_progress");
+  
+  // Calcular relatórios das últimas 24 horas
+  const oneDayAgo = new Date();
+  oneDayAgo.setDate(oneDayAgo.getDate() - 1);
+  const recentReports = allReports.filter(
+    report => new Date(report.createdAt) > oneDayAgo
+  ).length;
+  
+  return [
+    { 
+      label: "Ocorrências Total", 
+      value: allReports.length, 
+      trend: "up", 
+      percent: allReports.length > 0 ? 100 : 0 
+    },
+    { 
+      label: "Resolvidas", 
+      value: resolvedReports.length, 
+      trend: "up", 
+      percent: allReports.length > 0 ? Math.round((resolvedReports.length / allReports.length) * 100) : 0 
+    },
+    { 
+      label: "Em andamento", 
+      value: inProgressReports.length, 
+      trend: "up", 
+      percent: allReports.length > 0 ? Math.round((inProgressReports.length / allReports.length) * 100) : 0 
+    },
+    { 
+      label: "Últimas 24h", 
+      value: recentReports, 
+      trend: "up", 
+      percent: allReports.length > 0 ? Math.round((recentReports / allReports.length) * 100) : 0 
+    },
+  ];
+};
 
-// Mock data for daily tasks
+// Mock de tarefas diárias (ainda fictício, mas poderia ser dinâmico em uma versão real)
 export const mockDailyTasks: Task[] = [
-  { id: 1, title: "Inspecionar obras na Av. Brasil", completed: false, time: "09:00" },
-  { id: 2, title: "Verificar reclamações de ruído", completed: true, time: "11:30" },
-  { id: 3, title: "Reunião com secretaria", completed: false, time: "14:00" },
-  { id: 4, title: "Enviar relatório diário", completed: false, time: "17:00" },
+  { id: 1, title: "Inspecionar ocorrências pendentes", completed: false, time: "09:00" },
+  { id: 2, title: "Verificar novas reclamações", completed: false, time: "11:30" },
+  { id: 3, title: "Atualizar status de ocorrências", completed: false, time: "14:00" },
+  { id: 4, title: "Enviado relatório diário", completed: false, time: "17:00" },
 ];
 
-// Mock data for report categories
+// Categorias de ocorrências 
 export const mockReportCategories: Category[] = [
   { id: 1, name: "Buraco na via", icon: "🚧" },
   { id: 2, name: "Poda de árvore", icon: "🌳" },
@@ -27,42 +61,11 @@ export const mockReportCategories: Category[] = [
   { id: 6, name: "Sinalização", icon: "🚦" },
 ];
 
-// Mock data for recent reports
-export const mockRecentReports: Report[] = [
-  { 
-    id: 1, 
-    type: "Buraco na via", 
-    description: "Buraco grande no meio da pista",
-    address: "Rua das Flores, 123", 
-    createdAt: "2023-05-08T10:30:00", 
-    status: "Pendente",
-    coordinates: { lat: -23.55152, lng: -46.633408 }
-  },
-  { 
-    id: 2, 
-    type: "Árvore caída", 
-    description: "Árvore caída bloqueando a passagem",
-    address: "Av. Principal, 456", 
-    createdAt: "2023-05-07T08:45:00",  
-    status: "Em andamento",
-    coordinates: { lat: -23.54550, lng: -46.638100 }
-  },
-  { 
-    id: 3, 
-    type: "Lâmpada queimada", 
-    description: "Lâmpada queimada há dias",
-    address: "Praça Central", 
-    createdAt: "2023-05-06T16:20:00", 
-    status: "Resolvido",
-    coordinates: { lat: -23.56052, lng: -46.629708 }
-  },
-  { 
-    id: 4, 
-    type: "Lixo acumulado", 
-    description: "Lixo acumulado em via pública",
-    address: "Rua Lateral, 789", 
-    createdAt: "2023-05-05T11:15:00",
-    status: "Resolvido",
-    coordinates: { lat: -23.55552, lng: -46.641308 }
-  },
-];
+// Obter ocorrências recentes baseadas nos dados reais
+export const getRecentReports = () => {
+  const allReports = getFilteredReports("all");
+  // Ordenar por data, começando com os mais recentes
+  return [...allReports]
+    .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
+    .slice(0, 5); // Pegar apenas os 5 mais recentes
+};
