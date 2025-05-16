@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import Layout from "../components/Layout";
 import { useAuth } from "../context/AuthContext";
@@ -31,7 +30,7 @@ import LocationTracker from "@/components/LocationTracker";
 const settingsSchema = z.object({
   trackLocation: z.boolean().default(true),
   notifications: z.boolean().default(true),
-  updateInterval: z.string().default("60"),
+  updateInterval: z.string().default("300"),
   mapType: z.enum(["map", "satellite", "hybrid"]).default("map"),
   dataUsage: z.enum(["low", "medium", "high"]).default("medium"),
   darkMode: z.boolean().default(false),
@@ -47,7 +46,7 @@ const Settings = () => {
   const defaultValues: SettingsFormValues = {
     trackLocation: true,
     notifications: true,
-    updateInterval: "60",
+    updateInterval: "300",
     mapType: "map",
     dataUsage: "medium",
     darkMode: false,
@@ -134,7 +133,6 @@ const Settings = () => {
                           </FormControl>
                           <SelectContent>
                             <SelectItem value="30">A cada 30 segundos</SelectItem>
-                            <SelectItem value="60">A cada 1 minuto</SelectItem>
                             <SelectItem value="300">A cada 5 minutos</SelectItem>
                             <SelectItem value="600">A cada 10 minutos</SelectItem>
                           </SelectContent>

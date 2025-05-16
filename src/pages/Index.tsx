@@ -18,7 +18,7 @@ const Index = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-primary/10 to-secondary/20">
       <div className="max-w-3xl mx-auto px-4 py-16 text-center">
         <h1 className="text-4xl md:text-6xl font-bold mb-6 text-primary">
-          CidadeMon
+          Câmara na Rua
         </h1>
         <p className="text-xl mb-8 max-w-2xl mx-auto">
           Sistema de monitoramento e gestão de ocorrências urbanas para prefeituras
