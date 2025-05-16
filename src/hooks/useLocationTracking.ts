@@ -50,7 +50,9 @@ export const useLocationTracking = ({ userId }: UseLocationTrackingProps = {}) =
           startTracking();
         }
       } catch (err) {
-        handleLocationError(err, setError);
+        // Fix: Correctly pass the setError function
+        const errorMsg = err instanceof Error ? err.message : String(err);
+        setError(errorMsg);
       }
     };
 
@@ -110,11 +112,12 @@ export const useLocationTracking = ({ userId }: UseLocationTrackingProps = {}) =
 
         },
         (err) => {
-          handleLocationError(err, setError);
+          // Fix: Handle the error properly without using handleLocationError
           if (err.code === 1) {  // Permissão negada
             setPermissionDenied(true);
             stopTracking();
           }
+          setError(err.message || "Erro ao obter localização");
         },
         {
           enableHighAccuracy: true,
@@ -126,7 +129,9 @@ export const useLocationTracking = ({ userId }: UseLocationTrackingProps = {}) =
       setTracking(true);
       localStorage.setItem('locationTracking', 'true');
     } catch (err) {
-      handleLocationError(err, setError);
+      // Fix: Handle the error properly without using handleLocationError
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      setError(errorMsg);
     }
   };
 
