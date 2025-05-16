@@ -39,4 +39,21 @@ export interface Report {
     address: string;
   };
   photos?: string[]; // Adicionando campo para fotos
+  updatedAt?: string; // Adding updatedAt field
+}
+
+// Adding missing interface to fix build errors
+export interface DashboardStats {
+  totalReports: number;
+  resolvedReports: number;
+  pendingReports: number;
+  inProgressReports: number;
+}
+
+// Adding WeatherInfo interface to fix build errors
+export interface WeatherInfo {
+  temperature: number;
+  condition: string;
+  icon: string;
+  city: string;
 }

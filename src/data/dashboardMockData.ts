@@ -1,6 +1,17 @@
 
-import { StatItem, Task, Category } from "@/types/dashboard";
+import { StatItem, Task, Category, Report, DashboardStats } from "@/types/dashboard";
 import { getFilteredReports } from "@/services/reportService";
+
+// Mock stats data for dashboard
+export const mockStats: DashboardStats = {
+  totalReports: 0,
+  resolvedReports: 0,
+  pendingReports: 0,
+  inProgressReports: 0
+};
+
+// Mock recent reports data
+export const mockRecentReports: Report[] = [];
 
 // Dados estatísticos calculados dinamicamente
 export const getStats = (): StatItem[] => {
