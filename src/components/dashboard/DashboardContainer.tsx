@@ -78,7 +78,7 @@ const DashboardContainer = () => {
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [isLoading, setIsLoading] = useState(false);
-  const weatherInfo = useWeather();
+  const { weatherData, loading: weatherLoading } = useWeather();
 
   const handleCategoryClick = (categoryName: string) => {
     navigate('/report/new', { state: { category: categoryName } });
@@ -101,9 +101,9 @@ const DashboardContainer = () => {
       <DashboardHeader 
         isLoading={isLoading} 
         weatherInfo={{
-          temp: weatherInfo?.temperature || 0,
-          condition: weatherInfo?.condition || "",
-          icon: weatherInfo?.icon || ""
+          temp: weatherData?.temperature || 0,
+          condition: weatherData?.condition || "",
+          icon: weatherData?.icon || ""
         }}
       />
       

@@ -1,25 +1,19 @@
 
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { 
-  Select, SelectContent, SelectItem, 
-  SelectTrigger, SelectValue 
-} from "@/components/ui/select";
-import {
-  Table, TableBody, TableCell, TableHead, 
-  TableHeader, TableRow
-} from "@/components/ui/table";
-import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
-import { useNavigate } from "react-router-dom";
-import { Search, FileText, Filter } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { getFilteredReports } from "@/services/reportService";
-import ExcelExportButton from "@/components/reports/ExcelExportButton";
-import type { Report } from "@/types/dashboard";
+import { Report } from "@/types/dashboard";
+
+// New component imports
+import ReportsHeader from "@/components/reports/ReportsHeader";
+import ReportsFilters from "@/components/reports/ReportsFilters";
+import ReportsTable from "@/components/reports/ReportsTable";
+import ReportsEmptyState from "@/components/reports/ReportsEmptyState";
+import ReportsLoadingState from "@/components/reports/ReportsLoadingState";
 
 const ReportsList = () => {
   const navigate = useNavigate();
@@ -107,159 +101,36 @@ const ReportsList = () => {
     navigate(`/report/${reportId}`);
   };
 
-  // Formatar data
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('pt-BR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
-  };
-
   return (
     <Layout>
       <div className="p-4 md:p-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              Lista de Ocorrências
-            </h1>
-            <p className="text-gray-500">
-              {user?.gabineteId 
-                ? `Ocorrências do Gabinete ${user.gabineteId}` 
-                : "Todas as ocorrências"
-              }
-            </p>
-          </div>
-          <div className="mt-4 md:mt-0 flex gap-2">
-            <Button 
-              variant="outline" 
-              onClick={() => navigate('/report/new')}
-            >
-              <FileText className="mr-2 h-4 w-4" />
-              Nova Ocorrência
-            </Button>
-            <ExcelExportButton 
-              reports={filteredReports} 
-              fileName={`ocorrencias_gabinete_${user?.gabineteId || 'todos'}`}
-              isLoading={isLoading}
-            />
-          </div>
-        </div>
+        <ReportsHeader 
+          gabineteId={user?.gabineteId}
+          reports={filteredReports}
+          isLoading={isLoading}
+        />
 
         <Card>
           <CardHeader className="pb-3">
             <CardTitle>Ocorrências Registradas</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="mb-6 flex flex-col md:flex-row gap-4">
-              <div className="flex-1">
-                <div className="relative">
-                  <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    placeholder="Pesquisar ocorrências..."
-                    className="pl-8"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="flex gap-2">
-                <div className="w-40">
-                  <Select value={statusFilter} onValueChange={setStatusFilter}>
-                    <SelectTrigger>
-                      <Filter className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os status</SelectItem>
-                      <SelectItem value="pending">Pendentes</SelectItem>
-                      <SelectItem value="in_progress">Em andamento</SelectItem>
-                      <SelectItem value="resolved">Resolvidas</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="w-48">
-                  <Select value={typeFilter} onValueChange={setTypeFilter}>
-                    <SelectTrigger>
-                      <Filter className="h-4 w-4 mr-2" />
-                      <SelectValue placeholder="Tipo" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos os tipos</SelectItem>
-                      {uniqueTypes.map(type => (
-                        <SelectItem key={type} value={type}>
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
+            <ReportsFilters
+              uniqueTypes={uniqueTypes}
+              onSearchChange={setSearchQuery}
+              onStatusFilterChange={setStatusFilter}
+              onTypeFilterChange={setTypeFilter}
+            />
             
             {isLoading ? (
-              <div className="py-8 flex justify-center">
-                <div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-              </div>
+              <ReportsLoadingState />
             ) : filteredReports.length > 0 ? (
-              <div className="rounded-md border overflow-hidden">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[80px]">ID</TableHead>
-                      <TableHead>Tipo</TableHead>
-                      <TableHead>Endereço</TableHead>
-                      <TableHead className="hidden md:table-cell">Reclamante</TableHead>
-                      <TableHead className="hidden md:table-cell">Data</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead className="text-right">Ações</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredReports.map((report) => (
-                      <TableRow key={report.id}>
-                        <TableCell className="font-medium">{report.id}</TableCell>
-                        <TableCell>{report.type}</TableCell>
-                        <TableCell className="max-w-[200px] truncate">
-                          {report.address}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {report.complainant?.fullName || "Não informado"}
-                        </TableCell>
-                        <TableCell className="hidden md:table-cell">
-                          {formatDate(report.createdAt)}
-                        </TableCell>
-                        <TableCell>
-                          <Badge className={
-                            report.status === "Pendente" ? "bg-blue-500" : 
-                            report.status === "Em andamento" ? "bg-amber-500" : 
-                            "bg-green-500"
-                          }>
-                            {report.status}
-                          </Badge>
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleViewDetails(report.id)}
-                          >
-                            Ver
-                          </Button>
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+              <ReportsTable 
+                reports={filteredReports} 
+                onViewDetails={handleViewDetails}
+              />
             ) : (
-              <div className="py-8 text-center">
-                <p className="text-muted-foreground">
-                  Nenhuma ocorrência encontrada.
-                </p>
-              </div>
+              <ReportsEmptyState />
             )}
             
             <div className="mt-4 text-sm text-muted-foreground">
