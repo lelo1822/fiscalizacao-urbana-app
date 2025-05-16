@@ -8,7 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { getFilteredReports } from "@/services/reportService";
 import { Report } from "@/types/dashboard";
 
-// New component imports
+// Component imports
 import ReportsHeader from "@/components/reports/ReportsHeader";
 import ReportsFilters from "@/components/reports/ReportsFilters";
 import ReportsTable from "@/components/reports/ReportsTable";
@@ -24,21 +24,19 @@ const ReportsList = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [dateRangeStart, setDateRangeStart] = useState<Date | undefined>();
+  const [dateRangeEnd, setDateRangeEnd] = useState<Date | undefined>();
 
-  // Carregar ocorrências (simulado por enquanto)
+  // Carregar ocorrências
   useEffect(() => {
     const fetchReports = async () => {
       try {
-        // Em um caso real, filtraríamos por gabineteId do usuário
         const gabineteId = user?.gabineteId;
-        
-        // Simulando a obtenção de dados filtrados por gabinete
         const allReports = getFilteredReports("all");
         
-        // Filtrar ocorrências pelo gabineteId do usuário (em um caso real)
         const userReports = gabineteId 
           ? allReports.filter(report => report.agent?.gabineteId === gabineteId)
-          : allReports; // Admin vê tudo
+          : allReports;
           
         setReports(userReports);
         setFilteredReports(userReports);
@@ -57,14 +55,14 @@ const ReportsList = () => {
     fetchReports();
   }, [user?.gabineteId]);
 
-  // Extrair tipos únicos para o filtro
+  // Extract unique types for filter
   const uniqueTypes = [...new Set(reports.map(report => report.type))];
 
-  // Aplicar filtros e pesquisa
+  // Apply filters and search
   useEffect(() => {
     let result = [...reports];
     
-    // Filtrar por status
+    // Filter by status
     if (statusFilter !== "all") {
       result = result.filter(report => {
         if (statusFilter === "pending") return report.status === "Pendente";
@@ -74,12 +72,42 @@ const ReportsList = () => {
       });
     }
     
-    // Filtrar por tipo
+    // Filter by type
     if (typeFilter !== "all") {
       result = result.filter(report => report.type === typeFilter);
     }
     
-    // Pesquisa
+    // Filter by date range
+    if (dateRangeStart || dateRangeEnd) {
+      result = result.filter(report => {
+        const reportDate = new Date(report.createdAt);
+        
+        // If only start date is provided
+        if (dateRangeStart && !dateRangeEnd) {
+          return reportDate >= dateRangeStart;
+        }
+        
+        // If only end date is provided
+        if (!dateRangeStart && dateRangeEnd) {
+          // Add one day to include the end date fully
+          const endDatePlusOne = new Date(dateRangeEnd);
+          endDatePlusOne.setDate(endDatePlusOne.getDate() + 1);
+          return reportDate < endDatePlusOne;
+        }
+        
+        // If both dates are provided
+        if (dateRangeStart && dateRangeEnd) {
+          // Add one day to include the end date fully
+          const endDatePlusOne = new Date(dateRangeEnd);
+          endDatePlusOne.setDate(endDatePlusOne.getDate() + 1);
+          return reportDate >= dateRangeStart && reportDate < endDatePlusOne;
+        }
+        
+        return true;
+      });
+    }
+    
+    // Search
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
       result = result.filter(
@@ -94,9 +122,15 @@ const ReportsList = () => {
     }
     
     setFilteredReports(result);
-  }, [reports, searchQuery, statusFilter, typeFilter]);
+  }, [reports, searchQuery, statusFilter, typeFilter, dateRangeStart, dateRangeEnd]);
 
-  // Manipular clique para ver detalhes
+  // Handle date range filter changes
+  const handleDateRangeChange = (startDate: Date | undefined, endDate: Date | undefined) => {
+    setDateRangeStart(startDate);
+    setDateRangeEnd(endDate);
+  };
+
+  // Handle view details click
   const handleViewDetails = (reportId: number) => {
     navigate(`/report/${reportId}`);
   };
@@ -120,6 +154,7 @@ const ReportsList = () => {
               onSearchChange={setSearchQuery}
               onStatusFilterChange={setStatusFilter}
               onTypeFilterChange={setTypeFilter}
+              onDateRangeChange={handleDateRangeChange}
             />
             
             {isLoading ? (
