@@ -8,6 +8,7 @@ import { toast } from "@/hooks/use-toast";
 import { getFilteredReports } from "@/services/reportService";
 import { Report } from "@/types/dashboard";
 import { usePagination } from "@/hooks/usePagination";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Component imports
 import ReportsHeader from "@/components/reports/ReportsHeader";
@@ -16,13 +17,16 @@ import ReportsTable from "@/components/reports/ReportsTable";
 import ReportsEmptyState from "@/components/reports/ReportsEmptyState";
 import ReportsLoadingState from "@/components/reports/ReportsLoadingState";
 import ReportsPagination from "@/components/reports/ReportsPagination";
+import ReportsErrorState from "@/components/reports/ReportsErrorState";
 
 const ReportsList = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const isMobile = useIsMobile();
   const [reports, setReports] = useState<Report[]>([]);
   const [filteredReports, setFilteredReports] = useState<Report[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
@@ -47,6 +51,9 @@ const ReportsList = () => {
   // Carregar ocorrências
   useEffect(() => {
     const fetchReports = async () => {
+      setIsLoading(true);
+      setError(null);
+      
       try {
         const gabineteId = user?.gabineteId;
         const allReports = getFilteredReports("all");
@@ -57,14 +64,15 @@ const ReportsList = () => {
           
         setReports(userReports);
         setFilteredReports(userReports);
-        setIsLoading(false);
       } catch (error) {
         console.error("Erro ao carregar ocorrências:", error);
+        setError("Não foi possível carregar as ocorrências. Verifique sua conexão e tente novamente.");
         toast({
           title: "Erro",
           description: "Não foi possível carregar as ocorrências.",
           variant: "destructive",
         });
+      } finally {
         setIsLoading(false);
       }
     };
@@ -160,6 +168,17 @@ const ReportsList = () => {
     navigate(`/report/${reportId}`);
   };
 
+  // Retry loading reports
+  const handleRetry = () => {
+    // Reset error state and trigger a reload by refreshing the dependency
+    setReports([]);
+    setError(null);
+    // Forced reload of the data
+    setTimeout(() => {
+      setIsLoading(true);
+    }, 100);
+  };
+
   return (
     <Layout>
       <div className="p-4 md:p-8">
@@ -184,6 +203,11 @@ const ReportsList = () => {
             
             {isLoading ? (
               <ReportsLoadingState />
+            ) : error ? (
+              <ReportsErrorState 
+                message={error} 
+                onRetry={handleRetry}
+              />
             ) : filteredReports.length > 0 ? (
               <>
                 <ReportsTable 
@@ -195,7 +219,7 @@ const ReportsList = () => {
                   endIndex={endIndex}
                 />
                 
-                <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
+                <div className={`${isMobile ? 'flex flex-col space-y-4' : 'flex justify-between items-center'} mt-4`}>
                   <div className="flex items-center gap-2">
                     <span className="text-sm text-muted-foreground">Itens por página:</span>
                     <select 

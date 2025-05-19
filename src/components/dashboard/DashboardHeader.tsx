@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useState, useEffect } from "react";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DashboardHeaderProps {
   isLoading: boolean;
@@ -20,14 +21,16 @@ const DashboardHeader = ({ isLoading, weatherInfo }: DashboardHeaderProps) => {
   const navigate = useNavigate();
   const { user } = useAuth();
   const [todayDate, setTodayDate] = useState("");
+  const isMobile = useIsMobile();
 
   // Format current date
   useEffect(() => {
     const today = new Date();
+    const dateFormat = isMobile ? "EEEE, d MMM" : "EEEE, d 'de' MMMM";
     setTodayDate(
-      format(today, "EEEE, d 'de' MMMM", { locale: ptBR })
+      format(today, dateFormat, { locale: ptBR })
     );
-  }, []);
+  }, [isMobile]);
 
   return (
     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">

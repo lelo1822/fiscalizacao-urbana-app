@@ -7,9 +7,11 @@ import RecentReportsSection from './RecentReportsSection';
 import TasksSection from './TasksSection';
 import CategoriesSection from './CategoriesSection';
 import StatisticsCharts from './StatisticsCharts';
+import ReportsErrorState from '@/components/reports/ReportsErrorState';
 import { useAuth } from '@/context/AuthContext';
 import { useWeather } from '@/hooks/useWeather';
 import { usePagination } from '@/hooks/usePagination';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { DashboardStats, Report, StatItem, Task, Category } from '@/types/dashboard';
 
 // Dados simulados para demonstração
@@ -74,12 +76,14 @@ const mockCategories: Category[] = [
 const DashboardContainer = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [reports, setReports] = useState<Report[]>(mockReports);
   const [stats, setStats] = useState<DashboardStats>(mockStats);
   const [statItems, setStatItems] = useState<StatItem[]>(mockStatItems);
   const [tasks, setTasks] = useState<Task[]>(mockTasks);
   const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { weatherData, loading: weatherLoading } = useWeather();
   
   // Use pagination for reports
@@ -104,6 +108,16 @@ const DashboardContainer = () => {
   const handleViewReportDetails = (reportId: number) => {
     navigate(`/report/${reportId}`);
   };
+  
+  const handleRetry = () => {
+    setError(null);
+    setIsLoading(true);
+    // Simular recarga de dados
+    setTimeout(() => {
+      setReports(mockReports);
+      setIsLoading(false);
+    }, 1000);
+  };
 
   return (
     <div className="container mx-auto px-4 py-6 md:py-8 max-w-7xl">
@@ -122,16 +136,23 @@ const DashboardContainer = () => {
         <StatisticsSection stats={statItems} />
         
         {/* Charts */}
-        <StatisticsCharts className="mt-2" />
+        <StatisticsCharts className={`mt-2 ${isMobile ? 'overflow-x-auto' : ''}`} />
         
         {/* Main content grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-2 space-y-6">
-            <RecentReportsSection 
-              reports={paginatedReports} 
-              onViewDetails={handleViewReportDetails}
-              isLoading={isLoading}
-            />
+        <div className={`grid grid-cols-1 ${isMobile ? '' : 'lg:grid-cols-3'} gap-6`}>
+          <div className={`${isMobile ? '' : 'lg:col-span-2'} space-y-6`}>
+            {error ? (
+              <ReportsErrorState 
+                message={error} 
+                onRetry={handleRetry}
+              />
+            ) : (
+              <RecentReportsSection 
+                reports={paginatedReports} 
+                onViewDetails={handleViewReportDetails}
+                isLoading={isLoading}
+              />
+            )}
           </div>
           
           <div className="space-y-6">
