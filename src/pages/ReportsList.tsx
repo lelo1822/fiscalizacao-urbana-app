@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import { getFilteredReports } from "@/services/reportService";
 import { Report } from "@/types/dashboard";
+import { usePagination } from "@/hooks/usePagination";
 
 // Component imports
 import ReportsHeader from "@/components/reports/ReportsHeader";
@@ -14,6 +15,7 @@ import ReportsFilters from "@/components/reports/ReportsFilters";
 import ReportsTable from "@/components/reports/ReportsTable";
 import ReportsEmptyState from "@/components/reports/ReportsEmptyState";
 import ReportsLoadingState from "@/components/reports/ReportsLoadingState";
+import ReportsPagination from "@/components/reports/ReportsPagination";
 
 const ReportsList = () => {
   const navigate = useNavigate();
@@ -26,6 +28,21 @@ const ReportsList = () => {
   const [typeFilter, setTypeFilter] = useState("all");
   const [dateRangeStart, setDateRangeStart] = useState<Date | undefined>();
   const [dateRangeEnd, setDateRangeEnd] = useState<Date | undefined>();
+  const [itemsPerPage, setItemsPerPage] = useState(10); // Default items per page
+
+  // Pagination hook
+  const {
+    currentPage,
+    totalPages,
+    paginatedItems: paginatedReports,
+    setPage,
+    startIndex,
+    endIndex
+  } = usePagination({
+    items: filteredReports,
+    itemsPerPage,
+    initialPage: 1
+  });
 
   // Carregar ocorrências
   useEffect(() => {
@@ -122,12 +139,20 @@ const ReportsList = () => {
     }
     
     setFilteredReports(result);
+    // Reset to first page when filters change
+    setPage(1);
   }, [reports, searchQuery, statusFilter, typeFilter, dateRangeStart, dateRangeEnd]);
 
   // Handle date range filter changes
   const handleDateRangeChange = (startDate: Date | undefined, endDate: Date | undefined) => {
     setDateRangeStart(startDate);
     setDateRangeEnd(endDate);
+  };
+
+  // Handle items per page change
+  const handleItemsPerPageChange = (count: number) => {
+    setItemsPerPage(count);
+    setPage(1); // Reset to first page when changing items per page
   };
 
   // Handle view details click
@@ -160,17 +185,41 @@ const ReportsList = () => {
             {isLoading ? (
               <ReportsLoadingState />
             ) : filteredReports.length > 0 ? (
-              <ReportsTable 
-                reports={filteredReports} 
-                onViewDetails={handleViewDetails}
-              />
+              <>
+                <ReportsTable 
+                  reports={paginatedReports}
+                  onViewDetails={handleViewDetails}
+                  currentPage={currentPage}
+                  totalItems={filteredReports.length}
+                  startIndex={startIndex}
+                  endIndex={endIndex}
+                />
+                
+                <div className="flex flex-col sm:flex-row justify-between items-center mt-4 gap-4">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">Itens por página:</span>
+                    <select 
+                      className="text-sm border rounded px-2 py-1"
+                      value={itemsPerPage}
+                      onChange={(e) => handleItemsPerPageChange(Number(e.target.value))}
+                    >
+                      <option value={10}>10</option>
+                      <option value={25}>25</option>
+                      <option value={50}>50</option>
+                      <option value={100}>100</option>
+                    </select>
+                  </div>
+                  
+                  <ReportsPagination 
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    onPageChange={setPage}
+                  />
+                </div>
+              </>
             ) : (
               <ReportsEmptyState />
             )}
-            
-            <div className="mt-4 text-sm text-muted-foreground">
-              Total: {filteredReports.length} ocorrência(s)
-            </div>
           </CardContent>
         </Card>
       </div>

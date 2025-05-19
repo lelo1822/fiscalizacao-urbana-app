@@ -10,9 +10,19 @@ import { Report } from "@/types/dashboard";
 interface ReportsTableProps {
   reports: Report[];
   onViewDetails: (reportId: number) => void;
+  currentPage: number;
+  totalItems: number;
+  startIndex: number;
+  endIndex: number;
 }
 
-const ReportsTable = ({ reports, onViewDetails }: ReportsTableProps) => {
+const ReportsTable = ({ 
+  reports, 
+  onViewDetails,
+  startIndex,
+  endIndex, 
+  totalItems 
+}: ReportsTableProps) => {
 
   // Formatar data
   const formatDate = (dateString: string) => {
@@ -74,6 +84,9 @@ const ReportsTable = ({ reports, onViewDetails }: ReportsTableProps) => {
           ))}
         </TableBody>
       </Table>
+      <div className="text-sm px-4 py-2 text-muted-foreground border-t">
+        Exibindo {startIndex + 1}-{endIndex + 1} de {totalItems} ocorrências
+      </div>
     </div>
   );
 };
