@@ -21,7 +21,7 @@ const DashboardHeader = ({ isLoading, weatherInfo }: DashboardHeaderProps) => {
   const { user } = useAuth();
   const [todayDate, setTodayDate] = useState("");
 
-  // Formatar data atual
+  // Format current date
   useEffect(() => {
     const today = new Date();
     setTodayDate(
@@ -30,19 +30,19 @@ const DashboardHeader = ({ isLoading, weatherInfo }: DashboardHeaderProps) => {
   }, []);
 
   return (
-    <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+    <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-4">
       <div>
         <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-          Olá, {user?.name}
+          Olá, {user?.name?.split(' ')[0] || 'Agente'}
         </h1>
-        <p className="text-gray-500">
-          {todayDate} • {weatherInfo?.temp}°C {weatherInfo?.icon} {weatherInfo?.condition}
+        <p className="text-gray-500 text-sm md:text-base">
+          {todayDate} • {weatherInfo?.temp && `${weatherInfo.temp}°C`} {weatherInfo?.icon} {weatherInfo?.condition}
         </p>
       </div>
-      <div className="mt-4 md:mt-0">
+      <div className="w-full sm:w-auto">
         <Button 
           onClick={() => navigate('/report/new')}
-          className="bg-success hover:bg-success/90"
+          className="bg-success hover:bg-success/90 w-full sm:w-auto"
           disabled={isLoading}
         >
           <Camera className="mr-2 h-4 w-4" />

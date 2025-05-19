@@ -24,11 +24,11 @@ const StatisticsSection = ({ stats }: StatisticsSectionProps) => {
         <CardTitle>Estatísticas</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           {stats.map((stat, idx) => (
             <div
               key={idx}
-              className="bg-background rounded-lg p-4 border border-border shadow-sm"
+              className="bg-background rounded-lg p-4 border border-border shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex items-center justify-between">
                 <p className="text-sm font-medium text-muted-foreground">

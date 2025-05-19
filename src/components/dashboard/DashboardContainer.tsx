@@ -6,8 +6,10 @@ import StatisticsSection from './StatisticsSection';
 import RecentReportsSection from './RecentReportsSection';
 import TasksSection from './TasksSection';
 import CategoriesSection from './CategoriesSection';
+import StatisticsCharts from './StatisticsCharts';
 import { useAuth } from '@/context/AuthContext';
 import { useWeather } from '@/hooks/useWeather';
+import { usePagination } from '@/hooks/usePagination';
 import { DashboardStats, Report, StatItem, Task, Category } from '@/types/dashboard';
 
 // Dados simulados para demonstração
@@ -79,6 +81,13 @@ const DashboardContainer = () => {
   const [categories, setCategories] = useState<Category[]>(mockCategories);
   const [isLoading, setIsLoading] = useState(false);
   const { weatherData, loading: weatherLoading } = useWeather();
+  
+  // Use pagination for reports
+  const { paginatedItems: paginatedReports } = usePagination({
+    items: reports,
+    itemsPerPage: 3,
+    initialPage: 1
+  });
 
   const handleCategoryClick = (categoryName: string) => {
     navigate('/report/new', { state: { category: categoryName } });
@@ -97,7 +106,7 @@ const DashboardContainer = () => {
   };
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-4 py-6 md:py-8 max-w-7xl">
       <DashboardHeader 
         isLoading={isLoading} 
         weatherInfo={{
@@ -107,25 +116,34 @@ const DashboardContainer = () => {
         }}
       />
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-        <div className="lg:col-span-2 space-y-6">
-          <StatisticsSection stats={statItems} />
-          <RecentReportsSection 
-            reports={reports} 
-            onViewDetails={handleViewReportDetails}
-            isLoading={isLoading}
-          />
-        </div>
+      {/* Responsive grid layout */}
+      <div className="grid grid-cols-1 gap-6 mt-6">
+        {/* Statistics Cards */}
+        <StatisticsSection stats={statItems} />
         
-        <div className="space-y-6">
-          <TasksSection 
-            taskList={tasks} 
-            onTaskToggle={handleTaskToggle} 
-          />
-          <CategoriesSection 
-            categories={categories} 
-            onCategoryClick={handleCategoryClick} 
-          />
+        {/* Charts */}
+        <StatisticsCharts className="mt-2" />
+        
+        {/* Main content grid */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-2 space-y-6">
+            <RecentReportsSection 
+              reports={paginatedReports} 
+              onViewDetails={handleViewReportDetails}
+              isLoading={isLoading}
+            />
+          </div>
+          
+          <div className="space-y-6">
+            <TasksSection 
+              taskList={tasks} 
+              onTaskToggle={handleTaskToggle} 
+            />
+            <CategoriesSection 
+              categories={categories} 
+              onCategoryClick={handleCategoryClick} 
+            />
+          </div>
         </div>
       </div>
     </div>
