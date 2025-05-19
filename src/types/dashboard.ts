@@ -19,6 +19,12 @@ export interface Category {
   icon: string;
 }
 
+export interface Resolution {
+  description: string;
+  date: string;
+  responsible: string;
+}
+
 export interface Report {
   id: number;
   type: string;
@@ -40,6 +46,7 @@ export interface Report {
   };
   photos?: string[]; // Adicionando campo para fotos
   updatedAt?: string; // Adding updatedAt field
+  resolution?: Resolution; // Adicionando interface de resolução
 }
 
 // Adding missing interface to fix build errors
