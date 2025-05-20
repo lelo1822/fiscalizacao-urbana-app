@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { Search, Filter, Calendar } from "lucide-react";
+import { Search, Filter, Calendar, ChevronDown } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { 
   Select, SelectContent, SelectItem, 
@@ -9,8 +9,14 @@ import {
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { format } from "date-fns";
+import { format, subDays } from "date-fns";
 import { cn } from "@/lib/utils";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ReportsFiltersProps {
   uniqueTypes: string[];
@@ -29,12 +35,15 @@ const ReportsFilters = ({
 }: ReportsFiltersProps) => {
   const [startDate, setStartDate] = useState<Date>();
   const [endDate, setEndDate] = useState<Date>();
+  const [datePresetLabel, setDatePresetLabel] = useState<string>("Período");
 
   const handleDateChange = (type: 'start' | 'end', date: Date | undefined) => {
     if (type === 'start') {
       setStartDate(date);
+      setDatePresetLabel("Personalizado");
     } else {
       setEndDate(date);
+      setDatePresetLabel("Personalizado");
     }
     onDateRangeChange(type === 'start' ? date : startDate, type === 'end' ? date : endDate);
   };
@@ -42,7 +51,54 @@ const ReportsFilters = ({
   const clearDateFilters = () => {
     setStartDate(undefined);
     setEndDate(undefined);
+    setDatePresetLabel("Período");
     onDateRangeChange(undefined, undefined);
+  };
+
+  const applyDatePreset = (preset: string) => {
+    const today = new Date();
+    today.setHours(23, 59, 59, 999); // End of today
+
+    let start: Date | undefined;
+    let end: Date = today;
+
+    switch (preset) {
+      case "today":
+        start = new Date();
+        start.setHours(0, 0, 0, 0); // Start of today
+        setDatePresetLabel("Hoje");
+        break;
+      case "yesterday":
+        start = subDays(today, 1);
+        start.setHours(0, 0, 0, 0); // Start of yesterday
+        end = new Date(start);
+        end.setHours(23, 59, 59, 999); // End of yesterday
+        setDatePresetLabel("Ontem");
+        break;
+      case "last7days":
+        start = subDays(today, 6);
+        start.setHours(0, 0, 0, 0); // Start of 7 days ago
+        setDatePresetLabel("Últimos 7 dias");
+        break;
+      case "last30days":
+        start = subDays(today, 29);
+        start.setHours(0, 0, 0, 0); // Start of 30 days ago
+        setDatePresetLabel("Últimos 30 dias");
+        break;
+      case "last90days":
+        start = subDays(today, 89);
+        start.setHours(0, 0, 0, 0); // Start of 90 days ago
+        setDatePresetLabel("Últimos 90 dias");
+        break;
+      default:
+        start = undefined;
+        end = undefined;
+        break;
+    }
+
+    setStartDate(start);
+    setEndDate(end);
+    onDateRangeChange(start, end);
   };
 
   return (
@@ -90,56 +146,89 @@ const ReportsFilters = ({
           </Select>
         </div>
         
-        {/* Date Range Filter - Start Date */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button 
-              variant="outline" 
-              className={cn(
-                "w-40",
-                !startDate && "text-muted-foreground"
-              )}
-            >
-              <Calendar className="mr-2 h-4 w-4" />
-              {startDate ? format(startDate, "dd/MM/yyyy") : "Data inicial"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <CalendarComponent
-              mode="single"
-              selected={startDate}
-              onSelect={(date) => handleDateChange('start', date)}
-              initialFocus
-              className="pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
-        
-        {/* Date Range Filter - End Date */}
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button 
-              variant="outline" 
-              className={cn(
-                "w-40",
-                !endDate && "text-muted-foreground"
-              )}
-            >
-              <Calendar className="mr-2 h-4 w-4" />
-              {endDate ? format(endDate, "dd/MM/yyyy") : "Data final"}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <CalendarComponent
-              mode="single"
-              selected={endDate}
-              onSelect={(date) => handleDateChange('end', date)}
-              disabled={(date) => startDate ? date < startDate : false}
-              initialFocus
-              className="pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
+        {/* Date Range Filter with Presets */}
+        <div className="flex gap-1">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="w-40">
+                <Calendar className="mr-2 h-4 w-4" />
+                {datePresetLabel}
+                <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent className="w-40">
+              <DropdownMenuItem onClick={() => applyDatePreset("today")}>
+                Hoje
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => applyDatePreset("yesterday")}>
+                Ontem
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => applyDatePreset("last7days")}>
+                Últimos 7 dias
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => applyDatePreset("last30days")}>
+                Últimos 30 dias
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => applyDatePreset("last90days")}>
+                Últimos 90 dias
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={clearDateFilters}>
+                Limpar filtro
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          
+          {/* Custom Date Range Selection */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                className={cn(
+                  "w-40",
+                  !startDate && "text-muted-foreground"
+                )}
+              >
+                <Calendar className="mr-2 h-4 w-4" />
+                {startDate ? format(startDate, "dd/MM/yyyy") : "Data inicial"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <CalendarComponent
+                mode="single"
+                selected={startDate}
+                onSelect={(date) => handleDateChange('start', date)}
+                initialFocus
+                className="pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+          
+          {/* End Date Selection */}
+          <Popover>
+            <PopoverTrigger asChild>
+              <Button 
+                variant="outline" 
+                className={cn(
+                  "w-40",
+                  !endDate && "text-muted-foreground"
+                )}
+              >
+                <Calendar className="mr-2 h-4 w-4" />
+                {endDate ? format(endDate, "dd/MM/yyyy") : "Data final"}
+              </Button>
+            </PopoverTrigger>
+            <PopoverContent className="w-auto p-0">
+              <CalendarComponent
+                mode="single"
+                selected={endDate}
+                onSelect={(date) => handleDateChange('end', date)}
+                disabled={(date) => startDate ? date < startDate : false}
+                initialFocus
+                className="pointer-events-auto"
+              />
+            </PopoverContent>
+          </Popover>
+        </div>
         
         {/* Clear Date Filters button - only show if dates are selected */}
         {(startDate || endDate) && (

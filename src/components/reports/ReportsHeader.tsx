@@ -24,6 +24,7 @@ const ReportsHeader = ({ gabineteId, reports, isLoading }: ReportsHeaderProps) =
       <Button 
         variant="outline" 
         onClick={() => navigate('/report/new')}
+        disabled={isLoading}
       >
         <FileText className="mr-2 h-4 w-4" />
         Nova Ocorrência

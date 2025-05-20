@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { getFilteredReports } from "@/services/reportService";
 import { Report } from "@/types/dashboard";
 import { useAuth } from "@/context/AuthContext";
@@ -61,10 +61,10 @@ export const useReportsData = () => {
     fetchReports();
   }, [user?.gabineteId]);
 
-  // Apply filters and search
-  useEffect(() => {
-    let result = [...reports];
-    const { searchQuery, statusFilter, typeFilter, dateRangeStart, dateRangeEnd } = filters;
+  // Memoize filter function to improve performance
+  const applyFilters = useCallback((reportsToFilter: Report[], currentFilters: ReportsFiltersState) => {
+    const { searchQuery, statusFilter, typeFilter, dateRangeStart, dateRangeEnd } = currentFilters;
+    let result = [...reportsToFilter];
     
     // Filter by status
     if (statusFilter !== "all") {
@@ -125,39 +125,47 @@ export const useReportsData = () => {
       );
     }
     
-    setFilteredReports(result);
-  }, [reports, filters]);
+    return result;
+  }, []);
+
+  // Apply filters when reports or filters change
+  useEffect(() => {
+    if (reports.length > 0) {
+      const result = applyFilters(reports, filters);
+      setFilteredReports(result);
+    }
+  }, [reports, filters, applyFilters]);
 
   // Extract unique types for filter
   const uniqueTypes = [...new Set(reports.map(report => report.type))];
 
   // Filter update handlers
-  const updateSearchQuery = (query: string) => {
+  const updateSearchQuery = useCallback((query: string) => {
     setFilters(prev => ({ ...prev, searchQuery: query }));
-  };
+  }, []);
 
-  const updateStatusFilter = (status: string) => {
+  const updateStatusFilter = useCallback((status: string) => {
     setFilters(prev => ({ ...prev, statusFilter: status }));
-  };
+  }, []);
 
-  const updateTypeFilter = (type: string) => {
+  const updateTypeFilter = useCallback((type: string) => {
     setFilters(prev => ({ ...prev, typeFilter: type }));
-  };
+  }, []);
 
-  const updateDateRange = (startDate: Date | undefined, endDate: Date | undefined) => {
+  const updateDateRange = useCallback((startDate: Date | undefined, endDate: Date | undefined) => {
     setFilters(prev => ({ 
       ...prev, 
       dateRangeStart: startDate, 
       dateRangeEnd: endDate 
     }));
-  };
+  }, []);
 
   // Retry loading reports
-  const handleRetry = () => {
+  const handleRetry = useCallback(() => {
     setReports([]);
     setError(null);
     setIsLoading(true);
-  };
+  }, []);
 
   return {
     reports: filteredReports,
