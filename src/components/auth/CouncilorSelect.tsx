@@ -69,11 +69,12 @@ const CouncilorSelect = ({ selectedGabineteId, onChange, formError }: CouncilorS
             >
               <div className="flex flex-col items-center gap-2">
                 <div className="relative">
-                  <Avatar className="h-16 w-16 border-2 border-muted">
+                  {/* Modified Avatar to ensure photos are displayed properly */}
+                  <Avatar className="h-20 w-20 border-2 border-muted">
                     <AvatarImage 
                       src={vereador.imageUrl} 
                       alt={vereador.nome}
-                      className="object-cover" 
+                      className="object-contain" 
                     />
                     <AvatarFallback>{vereador.nome.charAt(0)}</AvatarFallback>
                   </Avatar>
@@ -86,7 +87,7 @@ const CouncilorSelect = ({ selectedGabineteId, onChange, formError }: CouncilorS
                 <div className="text-center">
                   <p className="text-sm font-medium line-clamp-1">{vereador.nome}</p>
                   <p className="text-xs text-muted-foreground">{vereador.partido}</p>
-                  <p className="text-xs text-muted-foreground">Gabinete {vereador.id}</p>
+                  {/* Removed gabinete number display */}
                 </div>
               </div>
             </Card>
