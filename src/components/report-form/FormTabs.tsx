@@ -5,7 +5,7 @@ import LocationSection from "./LocationSection";
 import IssueTypeSection from "./IssueTypeSection";
 import DescriptionSection from "./DescriptionSection";
 import PhotosSection from "./PhotosSection";
-import ComplainantSection from "./ComplainantSection";
+import ComplainantSection from "./complainant/ComplainantSection";
 import { Complainant } from "@/types/complainant";
 import { FormErrors } from "@/types/form";
 
