@@ -27,9 +27,9 @@ const LeafletMap = ({
     <Card className="w-full">
       <CardContent className="flex flex-col items-center justify-center" style={{ height }}>
         <AlertCircle className="h-12 w-12 text-muted-foreground mb-4" />
-        <h3 className="text-lg font-medium mb-2">Mapa não disponível</h3>
+        <h3 className="text-lg font-medium mb-2">Mapa indisponível</h3>
         <p className="text-muted-foreground text-center">
-          O recurso de mapa foi desativado nesta versão do aplicativo.
+          O recurso de mapa está desativado nesta versão do aplicativo.
         </p>
       </CardContent>
     </Card>

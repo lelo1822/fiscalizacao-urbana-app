@@ -3,7 +3,6 @@ import StatisticsSection from "./StatisticsSection";
 import { DashboardStats, StatItem } from "@/types/dashboard";
 import StatisticsCharts from "./StatisticsCharts";
 import NearbyIssuesSection from "./NearbyIssuesSection";
-import MapSection from "./MapSection";
 import CategoriesSection from "./CategoriesSection";
 import QuickReportSection from "./QuickReportSection";
 import RecentReportsSection from "./RecentReportsSection";
@@ -54,8 +53,6 @@ const DashboardContainer = ({
           isLoading={isLoading}
           issues={nearbyReports || []}
         />
-        
-        <MapSection />
         
         <CategoriesSection 
           categories={categoriesData?.categories || []}
