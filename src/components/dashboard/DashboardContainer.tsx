@@ -1,103 +1,85 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import DashboardHeader from './DashboardHeader';
-import StatisticsSection from './StatisticsSection';
-import RecentReportsSection from './RecentReportsSection';
-import TasksSection from './TasksSection';
-import CategoriesSection from './CategoriesSection';
-import StatisticsCharts from './StatisticsCharts';
-import ReportsErrorState from '@/components/reports/ReportsErrorState';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { Report, Task, Category } from '@/types/dashboard';
+
+import StatisticsSection from "./StatisticsSection";
+import TasksSection from "./TasksSection";
+import CategoriesSection from "./CategoriesSection";
+import QuickReportSection from "./QuickReportSection";
+import RecentReportsSection from "./RecentReportsSection";
+import MapSection from "./MapSection";
+import NearbyIssuesSection from "./NearbyIssuesSection";
+import StatisticsCharts from "./StatisticsCharts";
+import { useAuth } from "@/context/AuthContext";
+import { Report, StatItem, Task, WeatherInfo, DashboardStats } from "@/types/dashboard";
+import { useState } from "react";
 
 interface DashboardContainerProps {
-  dashboardData: {
-    stats: any[];
-    tasks: Task[];
-    recentReports: Report[];
-    categories: Category[];
-    weatherData: any;
-    loading: boolean;
-    error?: string | null;
-  }
+  stats: StatItem[];
+  dashboardStats: DashboardStats;
+  tasks: Task[];
+  reports: Report[];
+  nearbyReports: Report[];
+  isLoading: boolean;
+  error: string | null;
+  weatherInfo: WeatherInfo | null;
 }
 
-const DashboardContainer = ({ dashboardData }: DashboardContainerProps) => {
-  const navigate = useNavigate();
-  const isMobile = useIsMobile();
-  const [error, setError] = useState<string | null>(dashboardData.error || null);
-  
-  const handleCategoryClick = (categoryName: string) => {
-    navigate('/report/new', { state: { category: categoryName } });
-  };
+const DashboardContainer = ({
+  stats,
+  dashboardStats,
+  tasks,
+  reports,
+  nearbyReports,
+  isLoading,
+  error,
+  weatherInfo
+}: DashboardContainerProps) => {
+  const { user } = useAuth();
+  const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
 
-  const handleTaskToggle = (taskId: number) => {
-    setTasks(prevTasks =>
-      prevTasks.map(task =>
-        task.id === taskId ? { ...task, completed: !task.completed } : task
-      )
+  const handleTaskComplete = (taskId: number) => {
+    const updatedTasks = localTasks.map(task => 
+      task.id === taskId ? { ...task, completed: !task.completed } : task
     );
+    setLocalTasks(updatedTasks);
   };
 
-  const handleViewReportDetails = (reportId: number) => {
-    navigate(`/report/${reportId}`);
-  };
-  
-  const handleRetry = () => {
-    setError(null);
-    // Simular recarga de dados
-    setTimeout(() => {
-      setError(null);
-    }, 1000);
-  };
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-[500px]">
+        <div className="text-center">
+          <h3 className="text-lg font-medium">Erro ao carregar dados</h3>
+          <p className="text-muted-foreground">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-6 md:py-8 max-w-7xl">
-      <DashboardHeader 
-        isLoading={dashboardData.loading} 
-        weatherInfo={{
-          temp: dashboardData.weatherData?.temperature || 0,
-          condition: dashboardData.weatherData?.condition || "",
-          icon: dashboardData.weatherData?.icon || ""
-        }}
-      />
+    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
+      <div className="col-span-3 mb-2">
+        <StatisticsSection stats={stats} isLoading={isLoading} />
+      </div>
       
-      {/* Responsive grid layout */}
-      <div className="grid grid-cols-1 gap-6 mt-6">
-        {/* Statistics Cards */}
-        <StatisticsSection stats={dashboardData.stats} />
-        
-        {/* Charts */}
-        <StatisticsCharts className={`mt-2 ${isMobile ? 'overflow-x-auto' : ''}`} />
-        
-        {/* Main content grid */}
-        <div className={`grid grid-cols-1 ${isMobile ? '' : 'lg:grid-cols-3'} gap-6`}>
-          <div className={`${isMobile ? '' : 'lg:col-span-2'} space-y-6`}>
-            {error ? (
-              <ReportsErrorState 
-                message={error} 
-                onRetry={handleRetry}
-              />
-            ) : (
-              <RecentReportsSection 
-                reports={dashboardData.recentReports} 
-                onViewDetails={handleViewReportDetails}
-                isLoading={dashboardData.loading}
-              />
-            )}
-          </div>
-          
-          <div className="space-y-6">
-            <TasksSection 
-              taskList={dashboardData.tasks} 
-              onTaskToggle={handleTaskToggle} 
-            />
-            <CategoriesSection 
-              categories={dashboardData.categories} 
-              onCategoryClick={handleCategoryClick} 
-            />
-          </div>
-        </div>
+      <div className="md:col-span-2 space-y-4">
+        <StatisticsCharts data={dashboardStats} isLoading={isLoading} />
+        <RecentReportsSection reports={reports} isLoading={isLoading} />
+      </div>
+      
+      <div className="space-y-4">
+        <TasksSection 
+          tasks={localTasks} 
+          isLoading={isLoading} 
+          onTaskComplete={handleTaskComplete}
+        />
+        <CategoriesSection isLoading={isLoading} />
+        {user?.role === "agent" && <QuickReportSection />}
+      </div>
+      
+      <div className="col-span-3 md:col-span-2">
+        <MapSection isLoading={isLoading} weatherInfo={weatherInfo} />
+      </div>
+      
+      <div className="col-span-3 md:col-span-1">
+        <NearbyIssuesSection reports={nearbyReports} isLoading={isLoading} />
       </div>
     </div>
   );

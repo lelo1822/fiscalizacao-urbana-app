@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/components/ui/use-toast";
+import CouncilorSelect from "./CouncilorSelect";
 
 interface RegisterFormErrors {
   name: string;
@@ -93,7 +94,7 @@ const RegisterForm = () => {
     
     // Validação do gabinete
     if (!gabineteId) {
-      errors.gabinete = "Selecione um gabinete";
+      errors.gabinete = "Selecione um vereador/gabinete";
       isValid = false;
     }
 
@@ -240,42 +241,28 @@ const RegisterForm = () => {
           </SelectContent>
         </Select>
       </div>
-      <div className="space-y-2">
-        <Label htmlFor="gabinete">Gabinete</Label>
-        <Select 
-          value={gabineteId} 
-          onValueChange={handleGabineteChange}
-          disabled={isLoading}
-        >
-          <SelectTrigger className={formErrors.gabinete ? "border-destructive" : ""}>
-            <SelectValue placeholder="Selecione um gabinete" />
-          </SelectTrigger>
-          <SelectContent position="popper" className="bg-white">
-            {GABINETES.map(gabinete => (
-              <SelectItem key={gabinete.id} value={gabinete.id}>
-                {gabinete.nome}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-        {formErrors.gabinete && (
-          <p className="text-destructive text-xs mt-1">{formErrors.gabinete}</p>
-        )}
-        
-        {/* Informações sobre a capacidade do gabinete */}
-        {gabineteInfo && (
-          <div className="mt-2 text-xs text-muted-foreground">
-            <p>Vereadores: {gabineteInfo.vereadores}/1</p>
-            <p>Assessores: {gabineteInfo.assessores}/8</p>
-            {role === "vereador" && gabineteInfo.vereadores >= 1 && (
-              <p className="text-destructive">Este gabinete já possui um vereador cadastrado</p>
-            )}
-            {role === "agent" && gabineteInfo.assessores >= 8 && (
-              <p className="text-destructive">Este gabinete já atingiu o limite de assessores</p>
-            )}
-          </div>
-        )}
-      </div>
+      
+      {/* Replace the old gabinete select with our new councilor select component */}
+      <CouncilorSelect 
+        selectedGabineteId={gabineteId} 
+        onChange={handleGabineteChange}
+        formError={formErrors.gabinete}
+      />
+      
+      {/* Informações sobre a capacidade do gabinete */}
+      {gabineteInfo && (
+        <div className="mt-2 text-xs text-muted-foreground bg-muted p-2 rounded-md">
+          <p>Vereadores: {gabineteInfo.vereadores}/1</p>
+          <p>Assessores: {gabineteInfo.assessores}/8</p>
+          {role === "vereador" && gabineteInfo.vereadores >= 1 && (
+            <p className="text-destructive">Este gabinete já possui um vereador cadastrado</p>
+          )}
+          {role === "agent" && gabineteInfo.assessores >= 8 && (
+            <p className="text-destructive">Este gabinete já atingiu o limite de assessores</p>
+          )}
+        </div>
+      )}
+      
       <Button 
         type="submit" 
         className="w-full bg-primary hover:bg-primary/90 transition-colors" 
