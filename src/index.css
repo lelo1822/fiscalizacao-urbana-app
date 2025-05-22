@@ -16,10 +16,11 @@
     --popover: 0 0% 100%;
     --popover-foreground: 222.2 84% 4.9%;
 
-    --primary: 260 60% 40%; /* Purple color from the image */
+    /* Updated to match the image's purple color */
+    --primary: 265 84% 32%; /* Câmara de Osasco purple */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 260 60% 50%; /* Lighter purple color */
+    --secondary: 265 70% 40%; /* Lighter Osasco purple */
     --secondary-foreground: 0 0% 100%;
 
     --success: 134 61% 41%; /* #28a745 */
@@ -39,7 +40,7 @@
 
     --border: 214.3 31.8% 91.4%;
     --input: 214.3 31.8% 91.4%;
-    --ring: 260 60% 40%;
+    --ring: 265 84% 32%;
 
     --radius: 0.5rem;
   }
@@ -54,10 +55,10 @@
     --popover: 222.2 84% 4.9%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 260 60% 60%; /* Brighter purple for dark mode */
+    --primary: 265 70% 50%; /* Brighter Osasco purple for dark mode */
     --primary-foreground: 0 0% 100%;
 
-    --secondary: 260 60% 40%;
+    --secondary: 265 60% 40%;
     --secondary-foreground: 210 40% 98%;
 
     --muted: 217.2 32.6% 17.5%;
@@ -71,15 +72,15 @@
 
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
-    --ring: 260 60% 60%;
-    --sidebar-background: 260 25% 15%;
+    --ring: 265 70% 50%;
+    --sidebar-background: 265 60% 15%;
     --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 260 60% 60%;
+    --sidebar-primary: 265 70% 50%;
     --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 260 20% 20%;
+    --sidebar-accent: 265 55% 20%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 260 20% 20%;
-    --sidebar-ring: 260 60% 60%;
+    --sidebar-border: 265 55% 20%;
+    --sidebar-ring: 265 70% 50%;
   }
 }
 

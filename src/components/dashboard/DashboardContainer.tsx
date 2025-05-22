@@ -1,3 +1,4 @@
+
 import StatisticsSection from "./StatisticsSection";
 import { DashboardStats } from "@/types/dashboard";
 import StatisticsCharts from "./StatisticsCharts";
@@ -31,25 +32,33 @@ const DashboardContainer = ({
     <div className="container mx-auto p-4 max-w-7xl">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <StatisticsSection stats={dashboardStats} isLoading={isLoading} />
-        {/* The StatisticsCharts component needs to receive stats={dashboardStats} instead of dashboardStats={dashboardStats} */}
-        <StatisticsCharts stats={dashboardStats} />
+        
+        {/* Pass the dashboardStats to StatisticsCharts using the correct prop name */}
+        <StatisticsCharts dashboardStats={dashboardStats} />
+        
         <NearbyIssuesSection 
           isLoading={isLoading}
-          userLocation={userLocation}
           nearbyReports={nearbyReports || []}
         />
+        
         <MapSection />
+        
         <CategoriesSection 
-          isLoading={isLoading} 
           categoriesData={categoriesData} 
         />
-        <QuickReportSection />
+        
+        <QuickReportSection 
+          categories={categoriesData?.categories || []} 
+          onCategorySelect={() => {}} 
+          isLoading={isLoading}
+        />
+        
         <RecentReportsSection 
           isLoading={isLoading}
-          recentReports={recentReportsData}
+          reports={recentReportsData}
         />
+        
         <TasksSection 
-          isLoading={isLoading}
           tasks={tasksData || []}
         />
       </div>
