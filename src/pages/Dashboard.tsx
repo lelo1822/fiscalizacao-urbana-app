@@ -23,9 +23,10 @@ const Dashboard = () => {
   // Get user location
   const { location } = useUserLocation();
   
-  // Get map markers from reports
+  // Get map markers from reports with proper error handling
   const { markers } = useMapMarkers(recentReports || []);
 
+  // Convert location to the format expected by DashboardContainer
   const userPosition = location ? [location.latitude, location.longitude] as [number, number] : null;
 
   return (
@@ -40,7 +41,7 @@ const Dashboard = () => {
         isLoading={loading}
         error={error}
         weatherInfo={weatherData}
-        mapMarkers={markers}
+        mapMarkers={markers || []}
         userPosition={userPosition}
       />
       <LocationTracker />

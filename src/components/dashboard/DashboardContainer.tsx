@@ -22,8 +22,8 @@ interface DashboardContainerProps {
   isLoading: boolean;
   error: string | null;
   weatherInfo: WeatherInfo | null;
-  mapMarkers?: MapMarker[];
-  userPosition?: [number, number] | null;
+  mapMarkers: MapMarker[];
+  userPosition: [number, number] | null;
 }
 
 const DashboardContainer = ({
@@ -80,7 +80,9 @@ const DashboardContainer = ({
       </div>
       
       <div className="md:col-span-2 space-y-4">
-        <StatisticsCharts dashboardStats={dashboardStats} />
+        <StatisticsCharts 
+          dashboardStats={dashboardStats} 
+        />
         <RecentReportsSection 
           reports={reports} 
           isLoading={isLoading} 

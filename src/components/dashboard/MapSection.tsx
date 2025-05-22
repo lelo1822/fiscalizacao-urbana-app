@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Filter, Layers, MapPin } from "lucide-react";
@@ -26,15 +26,15 @@ interface MapSectionProps {
 const MapSection = ({ mapMarkers = [], userPosition, onMarkerClick }: MapSectionProps) => {
   const [showHeatmap, setShowHeatmap] = useState(false);
   const [showTraffic, setShowTraffic] = useState(false);
-  const [filteredMarkers, setFilteredMarkers] = useState<MapMarker[]>(mapMarkers || []);
+  const [filteredMarkers, setFilteredMarkers] = useState<MapMarker[]>(mapMarkers);
   const [activeFilters, setActiveFilters] = useState<string[]>([]);
   const [markerIconType, setMarkerIconType] = useState<'circle' | 'pin'>('circle');
   const [enableClustering, setEnableClustering] = useState(true);
 
-  // Make sure we update filtered markers when mapMarkers changes
-  useState(() => {
+  // Update filtered markers when mapMarkers changes
+  useEffect(() => {
     setFilteredMarkers(mapMarkers || []);
-  });
+  }, [mapMarkers]);
 
   // Count types of incidents for the filter menu
   const incidentTypes = (mapMarkers || []).reduce<Record<string, number>>((acc, marker) => {
