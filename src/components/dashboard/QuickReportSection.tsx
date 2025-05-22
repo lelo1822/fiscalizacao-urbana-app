@@ -1,12 +1,7 @@
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-
-interface Category {
-  id: number;
-  name: string;
-  icon: string;
-}
+import { Category } from "@/types/dashboard";
 
 interface QuickReportSectionProps {
   categories: Category[];
@@ -14,14 +9,29 @@ interface QuickReportSectionProps {
   isLoading: boolean;
 }
 
-const QuickReportSection = ({ categories, onCategorySelect, isLoading }: QuickReportSectionProps) => {
+const QuickReportSection = ({ categories = [], onCategorySelect, isLoading }: QuickReportSectionProps) => {
+  if (!categories || categories.length === 0) {
+    return (
+      <Card className="mb-6 hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <CardTitle>Registrar ocorrência rápida</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-muted-foreground py-4">
+            Nenhuma categoria disponível.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="mb-6 hover:shadow-md transition-shadow">
       <CardHeader className="pb-3">
         <CardTitle>Registrar ocorrência rápida</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-3">
           {categories.map((category) => (
             <Button
               key={category.id}

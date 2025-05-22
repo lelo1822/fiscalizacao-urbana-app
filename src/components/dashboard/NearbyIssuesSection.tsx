@@ -16,8 +16,24 @@ interface NearbyIssuesSectionProps {
   isLoading: boolean;
 }
 
-const NearbyIssuesSection = ({ issues, onViewDetails, isLoading }: NearbyIssuesSectionProps) => {
-  if (issues.length === 0) return null;
+const NearbyIssuesSection = ({ issues = [], onViewDetails, isLoading }: NearbyIssuesSectionProps) => {
+  if (!issues || issues.length === 0) {
+    return (
+      <Card className="mb-6 hover:shadow-md transition-shadow">
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center">
+            <AlertCircle className="h-5 w-5 text-warning mr-2" />
+            Ocorrências Próximas
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-muted-foreground py-8">
+            Nenhuma ocorrência próxima encontrada.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card className="mb-6 hover:shadow-md transition-shadow">
@@ -28,7 +44,7 @@ const NearbyIssuesSection = ({ issues, onViewDetails, isLoading }: NearbyIssuesS
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-1 gap-4">
           {issues.map((issue) => (
             <div
               key={issue.id}

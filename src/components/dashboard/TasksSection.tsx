@@ -9,6 +9,22 @@ interface TasksSectionProps {
 }
 
 const TasksSection = ({ taskList, onTaskToggle }: TasksSectionProps) => {
+  // Add a fallback for empty task list
+  if (!taskList || taskList.length === 0) {
+    return (
+      <Card className="hover:shadow-md transition-shadow">
+        <CardHeader className="pb-2">
+          <CardTitle>Tarefas</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-muted-foreground py-4">
+            Nenhuma tarefa disponível no momento.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
   return (
     <Card className="hover:shadow-md transition-shadow">
       <CardHeader className="pb-2">

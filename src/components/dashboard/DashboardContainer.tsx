@@ -8,8 +8,9 @@ import MapSection from "./MapSection";
 import NearbyIssuesSection from "./NearbyIssuesSection";
 import StatisticsCharts from "./StatisticsCharts";
 import { useAuth } from "@/context/AuthContext";
-import { Report, StatItem, Task, WeatherInfo, DashboardStats } from "@/types/dashboard";
+import { Report, StatItem, Task, WeatherInfo, DashboardStats, Category } from "@/types/dashboard";
 import { useState } from "react";
+import type { MapMarker } from "@/types/map";
 
 interface DashboardContainerProps {
   stats: StatItem[];
@@ -17,9 +18,12 @@ interface DashboardContainerProps {
   tasks: Task[];
   reports: Report[];
   nearbyReports: Report[];
+  categories: Category[];
   isLoading: boolean;
   error: string | null;
   weatherInfo: WeatherInfo | null;
+  mapMarkers?: MapMarker[];
+  userPosition?: [number, number] | null;
 }
 
 const DashboardContainer = ({
@@ -28,9 +32,12 @@ const DashboardContainer = ({
   tasks,
   reports,
   nearbyReports,
+  categories = [],
   isLoading,
   error,
-  weatherInfo
+  weatherInfo,
+  mapMarkers = [],
+  userPosition = null
 }: DashboardContainerProps) => {
   const { user } = useAuth();
   const [localTasks, setLocalTasks] = useState<Task[]>(tasks);
@@ -42,10 +49,18 @@ const DashboardContainer = ({
     setLocalTasks(updatedTasks);
   };
 
-  const handleViewReportDetails = (reportId: string) => {
+  const handleViewReportDetails = (reportId: number) => {
     // Handle viewing report details
     console.log("Viewing report details for:", reportId);
   };
+
+  // Convert nearbyReports to the expected Issue format for NearbyIssuesSection
+  const nearbyIssues = nearbyReports.map(report => ({
+    id: report.id,
+    type: report.type,
+    address: report.address,
+    status: report.status
+  }));
 
   if (error) {
     return (
@@ -75,26 +90,44 @@ const DashboardContainer = ({
       
       <div className="space-y-4">
         <TasksSection 
-          taskList={localTasks} 
-          isLoading={isLoading} 
-          onTaskComplete={handleTaskComplete}
+          taskList={localTasks}
+          onTaskToggle={handleTaskComplete}
         />
-        <CategoriesSection />
+        <CategoriesSection 
+          categories={categories}
+          onCategoryClick={(categoryName) => {
+            console.log("Category clicked:", categoryName);
+          }} 
+        />
         {user?.role === "agent" && (
           <QuickReportSection 
-            categories={["Buraco na via", "Lixo/Entulho", "Poda de árvore"]} 
-            onCategorySelect={() => {}} 
+            categories={categories} 
+            onCategorySelect={(categoryName) => {
+              console.log("Category selected for quick report:", categoryName);
+            }} 
             isLoading={isLoading} 
           />
         )}
       </div>
       
       <div className="col-span-3 md:col-span-2">
-        <MapSection weatherInfo={weatherInfo} />
+        <MapSection 
+          mapMarkers={mapMarkers}
+          userPosition={userPosition}
+          onMarkerClick={(marker) => {
+            console.log("Map marker clicked:", marker);
+          }}
+        />
       </div>
       
       <div className="col-span-3 md:col-span-1">
-        <NearbyIssuesSection reportList={nearbyReports} isLoading={isLoading} />
+        <NearbyIssuesSection 
+          issues={nearbyIssues} 
+          isLoading={isLoading} 
+          onViewDetails={(id) => {
+            console.log("View details for nearby issue:", id);
+          }}
+        />
       </div>
     </div>
   );
