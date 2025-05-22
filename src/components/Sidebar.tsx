@@ -30,6 +30,12 @@ const Sidebar = () => {
       .substring(0, 2);
   };
 
+  // Format user identification
+  const getUserIdentification = () => {
+    if (!user?.gabineteId) return "Admin";
+    return `Gabinete ${user.gabineteId}`;
+  };
+
   const MenuItem = ({
     to,
     icon,
@@ -104,7 +110,7 @@ const Sidebar = () => {
             <div className="ml-3 overflow-hidden">
               <p className="text-sm font-medium truncate">{user?.name}</p>
               <p className="text-xs text-muted-foreground truncate">
-                Gabinete {user?.gabineteId || "Admin"}
+                {getUserIdentification()}
               </p>
             </div>
           )}

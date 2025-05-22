@@ -66,6 +66,11 @@ const ReportDetail = () => {
     });
   };
 
+  // Format agent information to show name and office
+  const formatAgentInfo = (agent: { name: string; gabineteId: string }) => {
+    return `${agent.name} (Gabinete ${agent.gabineteId})`;
+  };
+
   if (!hasAccess) {
     return (
       <Layout>
