@@ -17,7 +17,6 @@ interface DashboardContainerProps {
   tasksData: any[] | null;
   dashboardStats: DashboardStats;
   stats: StatItem[];
-  userLocation: [number, number] | null;
   nearbyReports: any[] | null;
 }
 
@@ -28,7 +27,6 @@ const DashboardContainer = ({
   tasksData,
   dashboardStats,
   stats,
-  userLocation,
   nearbyReports
 }: DashboardContainerProps) => {
   const navigate = useNavigate();
@@ -46,7 +44,7 @@ const DashboardContainer = ({
   return (
     <div className="container mx-auto p-4 max-w-7xl">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <StatisticsSection stats={stats} isLoading={isLoading} />
+        <StatisticsSection stats={stats} />
         
         <StatisticsCharts stats={stats} />
         

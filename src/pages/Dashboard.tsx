@@ -11,7 +11,6 @@ const Dashboard = () => {
     tasks, 
     recentReports, 
     categories,
-    weatherData, 
     loading, 
     error,
     nearbyReports = []
@@ -27,7 +26,6 @@ const Dashboard = () => {
         nearbyReports={nearbyReports || []}
         categoriesData={{ categories: categories || [] }}
         isLoading={loading}
-        userLocation={null}
       />
     </Layout>
   );

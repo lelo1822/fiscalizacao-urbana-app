@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { Separator } from "@/components/ui/separator";
 import { Switch } from "@/components/ui/switch";
 import { toast } from "sonner";
-import LocationTracker from "@/components/LocationTracker";
 import { User, Camera, Bell } from "lucide-react";
 
 const Profile = () => {
@@ -21,7 +20,6 @@ const Profile = () => {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [notificationsEnabled, setNotificationsEnabled] = useState(true);
-  const [locationTrackingEnabled, setLocationTrackingEnabled] = useState(true);
 
   const handleUpdateProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -209,21 +207,6 @@ const Profile = () => {
                 
                 <Separator />
                 
-                <div className="flex items-center justify-between">
-                  <div className="space-y-0.5">
-                    <Label className="text-base">Rastreamento de localização</Label>
-                    <p className="text-sm text-muted-foreground">
-                      Permite o registro do seu trajeto durante expediente
-                    </p>
-                  </div>
-                  <Switch
-                    checked={locationTrackingEnabled}
-                    onCheckedChange={setLocationTrackingEnabled}
-                  />
-                </div>
-                
-                <Separator />
-                
                 <div className="space-y-2">
                   <h3 className="text-sm font-medium">Versão do aplicativo</h3>
                   <div className="flex items-center justify-between text-sm">
@@ -250,7 +233,6 @@ const Profile = () => {
           </div>
         </div>
       </div>
-      <LocationTracker />
     </Layout>
   );
 };

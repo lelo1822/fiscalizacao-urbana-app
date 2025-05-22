@@ -2,7 +2,6 @@
 import React from "react";
 import Layout from "../components/Layout";
 import SettingsForm from "@/components/settings/SettingsForm";
-import LocationTracker from "@/components/LocationTracker";
 
 const Settings = () => {
   return (
@@ -21,7 +20,6 @@ const Settings = () => {
           <SettingsForm />
         </div>
       </div>
-      <LocationTracker />
     </Layout>
   );
 };
