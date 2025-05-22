@@ -1,9 +1,13 @@
+
 import RegisterCard from "@/components/auth/RegisterCard";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Register = () => {
+  const isMobile = useIsMobile();
+  
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-background">
-      <div className="w-full max-w-3xl"> {/* Keeping the increased max-width for the registration form */}
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className={`w-full ${isMobile ? "px-2" : "max-w-3xl"}`}>
         <RegisterCard />
       </div>
     </div>
