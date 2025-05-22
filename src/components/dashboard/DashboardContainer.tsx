@@ -1,6 +1,6 @@
 
 import StatisticsSection from "./StatisticsSection";
-import { DashboardStats } from "@/types/dashboard";
+import { DashboardStats, StatItem } from "@/types/dashboard";
 import StatisticsCharts from "./StatisticsCharts";
 import NearbyIssuesSection from "./NearbyIssuesSection";
 import MapSection from "./MapSection";
@@ -8,13 +8,15 @@ import CategoriesSection from "./CategoriesSection";
 import QuickReportSection from "./QuickReportSection";
 import RecentReportsSection from "./RecentReportsSection";
 import TasksSection from "./TasksSection";
+import { useNavigate } from "react-router-dom";
 
 interface DashboardContainerProps {
   isLoading: boolean;
-  categoriesData: any;
+  categoriesData: { categories: any[] };
   recentReportsData: any[];
   tasksData: any[] | null;
   dashboardStats: DashboardStats;
+  stats: StatItem[];
   userLocation: [number, number] | null;
   nearbyReports: any[] | null;
 }
@@ -25,37 +27,51 @@ const DashboardContainer = ({
   recentReportsData,
   tasksData,
   dashboardStats,
+  stats,
   userLocation,
   nearbyReports
 }: DashboardContainerProps) => {
+  const navigate = useNavigate();
+
+  // Handle view details for reports
+  const handleViewDetails = (reportId: number) => {
+    navigate(`/report/${reportId}`);
+  };
+
+  // Handle category click
+  const handleCategoryClick = (categoryName: string) => {
+    navigate('/report/new', { state: { category: categoryName } });
+  };
+
   return (
     <div className="container mx-auto p-4 max-w-7xl">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <StatisticsSection stats={dashboardStats} isLoading={isLoading} />
+        <StatisticsSection stats={stats} isLoading={isLoading} />
         
-        {/* Pass the dashboardStats to StatisticsCharts using the correct prop name */}
-        <StatisticsCharts dashboardStats={dashboardStats} />
+        <StatisticsCharts stats={stats} />
         
         <NearbyIssuesSection 
           isLoading={isLoading}
-          nearbyReports={nearbyReports || []}
+          issues={nearbyReports || []}
         />
         
         <MapSection />
         
         <CategoriesSection 
-          categoriesData={categoriesData} 
+          categories={categoriesData?.categories || []}
+          onCategoryClick={handleCategoryClick}
         />
         
         <QuickReportSection 
           categories={categoriesData?.categories || []} 
-          onCategorySelect={() => {}} 
+          onCategorySelect={handleCategoryClick} 
           isLoading={isLoading}
         />
         
         <RecentReportsSection 
           isLoading={isLoading}
-          reports={recentReportsData}
+          reports={recentReportsData || []}
+          onViewDetails={handleViewDetails}
         />
         
         <TasksSection 
