@@ -30,10 +30,38 @@ const Sidebar = () => {
       .substring(0, 2);
   };
 
-  // Format user identification
-  const getUserIdentification = () => {
+  // Get councilor name based on gabineteId
+  const getCouncilorName = () => {
+    // Import the same vereadores data used in CouncilorSelect
+    const VEREADORES = [
+      { id: "1", nome: "Alexandre Capriotti" },
+      { id: "2", nome: "Carmônio Bastos" },
+      { id: "3", nome: "Cantor Goleiro" },
+      { id: "4", nome: "Délbio Teruel" },
+      { id: "5", nome: "Elania Silva" },
+      { id: "6", nome: "Elsa Oliveira" },
+      { id: "7", nome: "Emerson Osasco" },
+      { id: "8", nome: "Fábio Chirinhan" },
+      { id: "9", nome: "Gabriel Saúde" },
+      { id: "10", nome: "Guiga" },
+      { id: "11", nome: "Guilherme Prado" },
+      { id: "12", nome: "Heber do JuntOz" },
+      { id: "13", nome: "Josias da Juco" },
+      { id: "14", nome: "Laércio Mendonça" },
+      { id: "15", nome: "Paulo Junior" },
+      { id: "16", nome: "Pedrinho Cantagessi" },
+      { id: "17", nome: "Ralfi Silva" },
+      { id: "18", nome: "Rodolfo Cara" },
+      { id: "19", nome: "Rodrigo Gansinho" },
+      { id: "20", nome: "Sergio Fontellas" },
+      { id: "21", nome: "Stephane Rossi" },
+    ];
+
     if (!user?.gabineteId) return "Admin";
-    return `Gabinete ${user.gabineteId}`;
+    
+    // Find the vereador with matching id
+    const vereador = VEREADORES.find(v => v.id === user.gabineteId);
+    return vereador ? vereador.nome : `Gabinete ${user.gabineteId}`;
   };
 
   const MenuItem = ({
@@ -110,7 +138,7 @@ const Sidebar = () => {
             <div className="ml-3 overflow-hidden">
               <p className="text-sm font-medium truncate">{user?.name}</p>
               <p className="text-xs text-muted-foreground truncate">
-                {getUserIdentification()}
+                {getCouncilorName()}
               </p>
             </div>
           )}
