@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
@@ -102,8 +103,8 @@ const Login = () => {
           <CardHeader className="space-y-1">
             <div className="flex flex-col items-center justify-center">
               <img 
-                src="/lovable-uploads/81a0c674-764e-4cc6-9635-fb50e91c47d7.png" 
-                alt="Escudo de Osasco" 
+                src="/lovable-uploads/dce4f081-f924-447d-965b-1668df335311.png" 
+                alt="Câmara Municipal de Osasco" 
                 className="h-24 w-auto mb-2"
               />
             </div>
