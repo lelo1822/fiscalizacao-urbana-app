@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
@@ -8,6 +7,7 @@ import { Complainant } from "@/types/complainant";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useAuth } from "../context/AuthContext";
 import { addReport } from "@/services/reportService";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Import our components
 import LocationSection from "@/components/report-form/LocationSection";
@@ -37,6 +37,7 @@ const ReportForm = () => {
   const location = useLocation();
   const { user } = useAuth();
   const state = location.state as LocationState;
+  const isMobile = useIsMobile();
   
   const [issueType, setIssueType] = useState(state?.category || "");
   const [description, setDescription] = useState("");
@@ -185,24 +186,23 @@ const ReportForm = () => {
     }
   };
 
-  // Modifique o JSX para passar handleAddressChange para o LocationSection
   return (
     <Layout>
-      <div className="p-4 md:p-8">
+      <div className={`${isMobile ? "p-2" : "p-4 md:p-8"}`}>
         <Card>
           <CardHeader>
-            <CardTitle className="text-2xl">Registrar Nova Ocorrência</CardTitle>
+            <CardTitle className={`${isMobile ? "text-xl" : "text-2xl"} mb-1`}>Registrar Nova Ocorrência</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-6">
               <Tabs defaultValue="occurrence" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="occurrence">Ocorrência</TabsTrigger>
-                  <TabsTrigger value="complainant">Dados do Reclamante</TabsTrigger>
+                  <TabsTrigger value="occurrence" className={`py-2 ${isMobile ? "text-sm" : ""}`}>Ocorrência</TabsTrigger>
+                  <TabsTrigger value="complainant" className={`py-2 ${isMobile ? "text-sm" : ""}`}>Dados do Reclamante</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="occurrence" className="space-y-6 pt-4">
-                  {/* Location Section - modificado para aceitar handleAddressChange */}
+                  {/* Location Section */}
                   <LocationSection 
                     address={address}
                     setAddress={handleAddressChange}

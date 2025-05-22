@@ -13,9 +13,9 @@ const BaseHeader = ({ title, description, actions, className = "" }: BaseHeaderP
   const isMobile = useIsMobile();
   
   return (
-    <div className={`flex flex-col ${isMobile ? "gap-3" : "sm:flex-row"} justify-between items-start sm:items-center mb-4 md:mb-6 gap-2 md:gap-4 ${className}`}>
+    <div className={`flex flex-col ${isMobile ? "gap-4" : "sm:flex-row"} justify-between items-start sm:items-center mb-6 md:mb-6 gap-3 md:gap-4 ${className}`}>
       <div>
-        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900">
+        <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 mb-1">
           {title}
         </h1>
         {description && (
@@ -25,7 +25,7 @@ const BaseHeader = ({ title, description, actions, className = "" }: BaseHeaderP
         )}
       </div>
       {actions && (
-        <div className={`${isMobile ? "w-full" : "w-auto"} flex flex-wrap gap-2`}>
+        <div className={`${isMobile ? "w-full mt-2" : "w-auto"} flex flex-wrap gap-2`}>
           {actions}
         </div>
       )}
