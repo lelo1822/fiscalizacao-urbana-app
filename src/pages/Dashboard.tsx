@@ -1,7 +1,6 @@
 
 import DashboardContainer from "@/components/dashboard/DashboardContainer";
 import Layout from "@/components/Layout";
-import LocationTracker from "@/components/LocationTracker";
 import { useDashboardData } from "@/hooks/useDashboardData";
 import { useMapMarkers } from "@/hooks/useMapMarkers";
 import { useUserLocation } from "@/hooks/useUserLocation";
@@ -21,13 +20,10 @@ const Dashboard = () => {
   } = useDashboardData();
 
   // Get user location
-  const { location } = useUserLocation();
+  const { userPosition } = useUserLocation();
   
   // Get map markers from reports with proper error handling
-  const { markers } = useMapMarkers(recentReports || []);
-
-  // Convert location to the format expected by DashboardContainer
-  const userPosition = location ? [location.latitude, location.longitude] as [number, number] : null;
+  const { markers } = useMapMarkers();
 
   return (
     <Layout>
@@ -44,7 +40,6 @@ const Dashboard = () => {
         mapMarkers={markers || []}
         userPosition={userPosition}
       />
-      <LocationTracker />
     </Layout>
   );
 };
