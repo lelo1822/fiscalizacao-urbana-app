@@ -6,8 +6,6 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { settingsSchema, SettingsFormValues, defaultSettings } from "@/schemas/settings-schema";
-import LocationSettings from "./LocationSettings";
-import MapSettings from "./MapSettings";
 import NotificationSettings from "./NotificationSettings";
 import DataUsageSettings from "./DataUsageSettings";
 import AppearanceSettings from "./AppearanceSettings";
@@ -37,8 +35,6 @@ const SettingsForm = () => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <LocationSettings form={form} />
-        <MapSettings form={form} />
         <NotificationSettings form={form} />
         <DataUsageSettings form={form} />
         <AppearanceSettings form={form} />
