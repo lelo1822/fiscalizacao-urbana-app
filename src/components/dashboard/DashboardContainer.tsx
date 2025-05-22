@@ -3,8 +3,6 @@ import StatisticsSection from "./StatisticsSection";
 import { DashboardStats, StatItem } from "@/types/dashboard";
 import StatisticsCharts from "./StatisticsCharts";
 import NearbyIssuesSection from "./NearbyIssuesSection";
-import CategoriesSection from "./CategoriesSection";
-import QuickReportSection from "./QuickReportSection";
 import RecentReportsSection from "./RecentReportsSection";
 import TasksSection from "./TasksSection";
 import { useNavigate } from "react-router-dom";
@@ -37,11 +35,6 @@ const DashboardContainer = ({
     navigate(`/report/${reportId}`);
   };
 
-  // Handle category click
-  const handleCategoryClick = (categoryName: string) => {
-    navigate('/report/new', { state: { category: categoryName } });
-  };
-
   return (
     <div className="container mx-auto px-2 md:px-4 max-w-7xl">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -52,17 +45,6 @@ const DashboardContainer = ({
         <NearbyIssuesSection 
           isLoading={isLoading}
           issues={nearbyReports || []}
-        />
-        
-        <CategoriesSection 
-          categories={categoriesData?.categories || []}
-          onCategoryClick={handleCategoryClick}
-        />
-        
-        <QuickReportSection 
-          categories={categoriesData?.categories || []} 
-          onCategorySelect={handleCategoryClick} 
-          isLoading={isLoading}
         />
         
         <div className={`${isMobile ? "" : "lg:col-span-2"}`}>
