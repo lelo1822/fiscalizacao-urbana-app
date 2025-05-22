@@ -1,10 +1,8 @@
 
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
-import LeafletMap from "@/components/LeafletMap";
-import MapLegend from "./MapLegend";
+import { AlertCircle } from "lucide-react";
 import type { MapMarker } from "@/types/map";
-import { useNavigate } from "react-router-dom";
 
 interface MapContainerProps {
   markers: MapMarker[];
@@ -12,33 +10,16 @@ interface MapContainerProps {
   enableClustering: boolean;
 }
 
-const MapContainer = ({ 
-  markers, 
-  userLocation, 
-  enableClustering 
-}: MapContainerProps) => {
-  const navigate = useNavigate();
-
-  // Handle marker click to navigate to report detail
-  const handleMarkerClick = (marker: MapMarker) => {
-    navigate(`/report/${marker.id}`);
-  };
-
+const MapContainer = ({ markers, userLocation, enableClustering }: MapContainerProps) => {
   return (
     <Card>
-      <CardContent className="p-0">
-        <div className="relative w-full h-[70vh]">
-          <LeafletMap 
-            markers={markers} 
-            showUserLocation={true}
-            center={userLocation || [-23.55052, -46.633308]}
-            zoom={13}
-            height="70vh"
-            onMarkerClick={handleMarkerClick}
-            enableClustering={enableClustering}
-          />
-          <MapLegend />
-        </div>
+      <CardContent className="flex flex-col items-center justify-center p-8 h-[70vh]">
+        <AlertCircle className="h-16 w-16 text-muted-foreground mb-4" />
+        <h2 className="text-xl font-semibold mb-2">Mapa não disponível</h2>
+        <p className="text-muted-foreground text-center max-w-md">
+          O recurso de mapa foi desativado nesta versão do aplicativo. 
+          Por favor, utilize as outras funcionalidades disponíveis.
+        </p>
       </CardContent>
     </Card>
   );

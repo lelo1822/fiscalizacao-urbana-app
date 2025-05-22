@@ -1,40 +1,17 @@
 
 import React from "react";
 import Layout from "../components/Layout";
-import MapContainer from "@/components/map-view/MapContainer";
 import MapViewHeader from "@/components/map-view/MapViewHeader";
-import { useState, useEffect } from "react";
-import { getFilteredReports, convertReportsToMarkers } from "@/services/reportService";
-import type { MapMarker } from "@/types/map";
-import LocationTracker from "@/components/LocationTracker";
+import MapContainer from "@/components/map-view/MapContainer";
 
 const MapPage = () => {
-  const [filter, setFilter] = useState("all");
-  const [markers, setMarkers] = useState<MapMarker[]>([]);
-  const [userLocation, setUserLocation] = useState<[number, number] | null>(null);
-  const [enableClustering, setEnableClustering] = useState(true);
-
-  // Filter reports based on selected filter
-  useEffect(() => {
-    const filteredReports = getFilteredReports(filter);
-    const newMarkers = convertReportsToMarkers(filteredReports);
-    setMarkers(newMarkers);
-  }, [filter]);
-
-  // Get user location once
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          const { latitude, longitude } = position.coords;
-          setUserLocation([latitude, longitude]);
-        },
-        (error) => {
-          console.error("Erro ao obter localização:", error);
-        }
-      );
-    }
-  }, []);
+  // Simplified props since map functionality is disabled
+  const markers = [];
+  const userLocation = null;
+  const enableClustering = false;
+  const filter = "all";
+  const setFilter = () => {};
+  const setEnableClustering = () => {};
   
   return (
     <Layout>
@@ -51,7 +28,6 @@ const MapPage = () => {
           enableClustering={enableClustering}
         />
       </div>
-      <LocationTracker />
     </Layout>
   );
 };
