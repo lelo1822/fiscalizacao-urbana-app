@@ -1,12 +1,12 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { GABINETES } from "@/context/AuthContext";
 import { Card } from "@/components/ui/card";
 import { Check } from "lucide-react";
 
-// Images for vereadores
+// Images for vereadores (all images alphabetically ordered by name)
 const VEREADORES = [
   { id: "1", nome: "Alexandre Capriotti", partido: "PL", imageUrl: "/lovable-uploads/5674c5ed-4a7f-4611-99aa-697285ce6581.png" },
   { id: "2", nome: "Carmônio Bastos", partido: "PODE", imageUrl: "/lovable-uploads/5edce2e4-6775-440f-b324-a8ff50e6d3ee.png" },
@@ -21,7 +21,14 @@ const VEREADORES = [
   { id: "11", nome: "Guilherme Prado", partido: "PRD", imageUrl: "/lovable-uploads/8d77a69c-0c63-43ba-b813-e777a89bf912.png" },
   { id: "12", nome: "Heber do JuntOz", partido: "PT", imageUrl: "/lovable-uploads/55ed6409-639c-44d6-90b0-df0f98630fc2.png" },
   { id: "13", nome: "Josias da Juco", partido: "PSD", imageUrl: "/lovable-uploads/2a55c2f6-db24-4e67-bb32-477446b0f628.png" },
-  // Add remaining vereadores with their respective images
+  { id: "14", nome: "Laércio Mendonça", partido: "PDT", imageUrl: "/lovable-uploads/8da74773-e485-438c-a144-a233ecf78786.png" },
+  { id: "15", nome: "Paulo Junior", partido: "PRD", imageUrl: "/lovable-uploads/427f5182-a2a5-4637-b0c7-c7426a982331.png" },
+  { id: "16", nome: "Pedrinho Cantagessi", partido: "UNIÃO", imageUrl: "/lovable-uploads/b2c573ac-f83d-4b5c-9a14-4e2ce38a788a.png" },
+  { id: "17", nome: "Ralfi Silva", partido: "REPUBL", imageUrl: "/lovable-uploads/081a607d-4422-4316-be1d-196d7b74ea65.png" },
+  { id: "18", nome: "Rodolfo Cara", partido: "PODE", imageUrl: "/lovable-uploads/bc779ba6-d341-4c16-8535-75ae77b52e41.png" },
+  { id: "19", nome: "Rodrigo Gansinho", partido: "PL", imageUrl: "/lovable-uploads/a0bba4a4-81ec-45e5-b0f3-b114b7afbb04.png" },
+  { id: "20", nome: "Sergio Fontellas", partido: "REPUBL", imageUrl: "/lovable-uploads/b6642b14-c66e-4e02-99c7-8ff4ce4d053e.png" },
+  { id: "21", nome: "Stephane Rossi", partido: "PL", imageUrl: "/lovable-uploads/c6c330dd-fbdf-4aad-ad30-eb58b4d6613f.png" },
 ].sort((a, b) => a.nome.localeCompare(b.nome)); // Sort alphabetically by name
 
 interface CouncilorSelectProps {
@@ -63,7 +70,11 @@ const CouncilorSelect = ({ selectedGabineteId, onChange, formError }: CouncilorS
               <div className="flex flex-col items-center gap-2">
                 <div className="relative">
                   <Avatar className="h-16 w-16 border-2 border-muted">
-                    <AvatarImage src={vereador.imageUrl} alt={vereador.nome} />
+                    <AvatarImage 
+                      src={vereador.imageUrl} 
+                      alt={vereador.nome}
+                      className="object-cover" 
+                    />
                     <AvatarFallback>{vereador.nome.charAt(0)}</AvatarFallback>
                   </Avatar>
                   {isSelected && (

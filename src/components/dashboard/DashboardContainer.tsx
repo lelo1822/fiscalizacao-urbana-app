@@ -42,6 +42,11 @@ const DashboardContainer = ({
     setLocalTasks(updatedTasks);
   };
 
+  const handleViewReportDetails = (reportId: string) => {
+    // Handle viewing report details
+    console.log("Viewing report details for:", reportId);
+  };
+
   if (error) {
     return (
       <div className="flex items-center justify-center h-[500px]">
@@ -56,30 +61,40 @@ const DashboardContainer = ({
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4 p-4">
       <div className="col-span-3 mb-2">
-        <StatisticsSection stats={stats} isLoading={isLoading} />
+        <StatisticsSection stats={stats} />
       </div>
       
       <div className="md:col-span-2 space-y-4">
-        <StatisticsCharts data={dashboardStats} isLoading={isLoading} />
-        <RecentReportsSection reports={reports} isLoading={isLoading} />
+        <StatisticsCharts dashboardStats={dashboardStats} />
+        <RecentReportsSection 
+          reports={reports} 
+          isLoading={isLoading} 
+          onViewDetails={handleViewReportDetails} 
+        />
       </div>
       
       <div className="space-y-4">
         <TasksSection 
-          tasks={localTasks} 
+          taskList={localTasks} 
           isLoading={isLoading} 
           onTaskComplete={handleTaskComplete}
         />
-        <CategoriesSection isLoading={isLoading} />
-        {user?.role === "agent" && <QuickReportSection />}
+        <CategoriesSection />
+        {user?.role === "agent" && (
+          <QuickReportSection 
+            categories={["Buraco na via", "Lixo/Entulho", "Poda de árvore"]} 
+            onCategorySelect={() => {}} 
+            isLoading={isLoading} 
+          />
+        )}
       </div>
       
       <div className="col-span-3 md:col-span-2">
-        <MapSection isLoading={isLoading} weatherInfo={weatherInfo} />
+        <MapSection weatherInfo={weatherInfo} />
       </div>
       
       <div className="col-span-3 md:col-span-1">
-        <NearbyIssuesSection reports={nearbyReports} isLoading={isLoading} />
+        <NearbyIssuesSection reportList={nearbyReports} isLoading={isLoading} />
       </div>
     </div>
   );
