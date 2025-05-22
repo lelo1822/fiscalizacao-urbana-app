@@ -93,7 +93,13 @@ const Login = () => {
       <div className="w-full max-w-md">
         <Card className="shadow-lg">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center">CidadeMon</CardTitle>
+            <div className="flex flex-col items-center justify-center">
+              <img 
+                src="/lovable-uploads/81a0c674-764e-4cc6-9635-fb50e91c47d7.png" 
+                alt="Escudo de Osasco" 
+                className="h-24 w-auto mb-2"
+              />
+            </div>
             <CardDescription className="text-center">
               Entre com suas credenciais para acessar o sistema
             </CardDescription>
@@ -177,6 +183,9 @@ const Login = () => {
               <Link to="/register" className="text-primary hover:underline">
                 Cadastre-se
               </Link>
+            </div>
+            <div className="text-center font-semibold text-primary">
+              Câmara na Rua
             </div>
           </CardFooter>
         </Card>
