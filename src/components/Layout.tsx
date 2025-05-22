@@ -16,9 +16,9 @@ const Layout = ({ children }: LayoutProps) => {
   const hideSidebar = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/';
   
   return (
-    <div className="flex min-h-screen">
+    <div className="flex min-h-screen w-full">
       {!hideSidebar && <Sidebar />}
-      <main className={`flex-1 ${isMobile ? "p-2" : "p-4"}`}>
+      <main className={`flex-1 ${isMobile ? "px-1 py-1" : "p-4"} overflow-x-hidden`}>
         {children}
       </main>
     </div>

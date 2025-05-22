@@ -6,6 +6,8 @@ import AgentFilter from "@/components/route-history/AgentFilter";
 import RouteCalendar from "@/components/route-history/RouteCalendar";
 import RouteSummary from "@/components/route-history/RouteSummary";
 import RouteHistoryList from "@/components/route-history/RouteHistoryList";
+import { useIsMobile } from "@/hooks/use-mobile";
+import BaseHeader from "@/components/shared/BaseHeader";
 
 const RouteHistory = () => {
   const { 
@@ -18,26 +20,24 @@ const RouteHistory = () => {
     isLoading,
     summary
   } = useRouteHistory();
+  
+  const isMobile = useIsMobile();
 
   return (
     <Layout>
-      <div className="p-4 md:p-8">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
-              Histórico de Rotas
-            </h1>
-            <p className="text-gray-500">
-              Visualize o registro de deslocamentos dos agentes
-            </p>
-          </div>
-          <div className="mt-4 md:mt-0 flex flex-col md:flex-row gap-4">
-            <AgentFilter value={agentFilter} onChange={setAgentFilter} />
-            <RouteCalendar date={date} setDate={setDate} />
-          </div>
-        </div>
+      <div className="p-2 md:p-4 lg:p-8">
+        <BaseHeader
+          title="Histórico de Rotas"
+          description="Visualize o registro de deslocamentos dos agentes"
+          actions={
+            <div className={`flex ${isMobile ? "flex-col w-full" : "flex-row"} gap-2 md:gap-4`}>
+              <AgentFilter value={agentFilter} onChange={setAgentFilter} />
+              <RouteCalendar date={date} setDate={setDate} />
+            </div>
+          }
+        />
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           <div className="lg:col-span-2">
             <RouteSummary
               distance={summary.distance}
@@ -49,10 +49,10 @@ const RouteHistory = () => {
           
           <div>
             <Card>
-              <CardHeader>
+              <CardHeader className={isMobile ? "px-4 py-3" : ""}>
                 <CardTitle>Histórico de Dias</CardTitle>
               </CardHeader>
-              <CardContent>
+              <CardContent className={isMobile ? "px-4 py-2" : ""}>
                 <RouteHistoryList 
                   routeDays={routeDays}
                   selectedDate={date}

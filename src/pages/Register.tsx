@@ -6,8 +6,8 @@ const Register = () => {
   const isMobile = useIsMobile();
   
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
-      <div className={`w-full ${isMobile ? "px-2" : "max-w-3xl"}`}>
+    <div className="min-h-screen flex items-center justify-center px-3 py-4">
+      <div className={`w-full ${isMobile ? "" : "max-w-3xl"}`}>
         <RegisterCard />
       </div>
     </div>

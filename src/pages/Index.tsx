@@ -3,10 +3,12 @@ import { useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const navigate = useNavigate();
   const { isAuthenticated } = useAuth();
+  const isMobile = useIsMobile();
   
   useEffect(() => {
     if (isAuthenticated) {
@@ -16,8 +18,8 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-primary">
-      <div className="w-full max-w-md mx-auto px-4 py-12 text-center">
-        <div className="mb-16">
+      <div className="w-full max-w-md mx-auto px-4 py-8 text-center">
+        <div className="mb-12">
           <img 
             src="/lovable-uploads/81a0c674-764e-4cc6-9635-fb50e91c47d7.png" 
             alt="Câmara Municipal de Osasco" 
@@ -34,7 +36,7 @@ const Index = () => {
             ACESSAR APP
           </Button>
           
-          <div className="grid grid-cols-2 gap-4 mt-4">
+          <div className={`grid ${isMobile ? 'grid-cols-1' : 'grid-cols-2'} gap-4 mt-4`}>
             <Button 
               onClick={() => navigate('/login')}
               variant="outline" 

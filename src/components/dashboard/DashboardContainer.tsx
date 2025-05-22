@@ -9,6 +9,7 @@ import QuickReportSection from "./QuickReportSection";
 import RecentReportsSection from "./RecentReportsSection";
 import TasksSection from "./TasksSection";
 import { useNavigate } from "react-router-dom";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 interface DashboardContainerProps {
   isLoading: boolean;
@@ -30,6 +31,7 @@ const DashboardContainer = ({
   nearbyReports
 }: DashboardContainerProps) => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Handle view details for reports
   const handleViewDetails = (reportId: number) => {
@@ -42,8 +44,8 @@ const DashboardContainer = ({
   };
 
   return (
-    <div className="container mx-auto p-4 max-w-7xl">
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div className="container mx-auto px-2 md:px-4 max-w-7xl">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         <StatisticsSection stats={stats} />
         
         <StatisticsCharts stats={stats} />
@@ -66,11 +68,13 @@ const DashboardContainer = ({
           isLoading={isLoading}
         />
         
-        <RecentReportsSection 
-          isLoading={isLoading}
-          reports={recentReportsData || []}
-          onViewDetails={handleViewDetails}
-        />
+        <div className={`${isMobile ? "" : "lg:col-span-2"}`}>
+          <RecentReportsSection 
+            isLoading={isLoading}
+            reports={recentReportsData || []}
+            onViewDetails={handleViewDetails}
+          />
+        </div>
         
         <TasksSection 
           tasks={tasksData || []}

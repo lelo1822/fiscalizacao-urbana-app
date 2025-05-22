@@ -2,6 +2,7 @@
 import { useNavigate } from "react-router-dom";
 import Layout from "../components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 // Custom hook for reports data and filtering
 import { useReportsData } from "@/hooks/useReportsData";
@@ -13,6 +14,7 @@ import ReportsContent from "@/components/reports/ReportsContent";
 
 const ReportsList = () => {
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   
   const { 
     reports, 
@@ -37,7 +39,7 @@ const ReportsList = () => {
 
   return (
     <Layout>
-      <div className="p-4 md:p-8">
+      <div className="p-2 md:p-4 lg:p-8">
         <ReportsHeader 
           gabineteId={undefined}
           reports={reports}
@@ -45,10 +47,10 @@ const ReportsList = () => {
         />
 
         <Card>
-          <CardHeader className="pb-3">
+          <CardHeader className={`pb-2 ${isMobile ? "px-3" : "px-6"}`}>
             <CardTitle>Ocorrências Registradas</CardTitle>
           </CardHeader>
-          <CardContent>
+          <CardContent className={isMobile ? "px-3" : "px-6"}>
             <ReportsFilters
               uniqueTypes={uniqueTypes}
               onSearchChange={updateSearchQuery}
