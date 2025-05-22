@@ -8,7 +8,6 @@ const Dashboard = () => {
   const { 
     stats, 
     dashboardStats, 
-    tasks, 
     recentReports, 
     categories,
     loading, 
@@ -21,7 +20,7 @@ const Dashboard = () => {
       <DashboardContainer 
         stats={stats || []} 
         dashboardStats={dashboardStats || { totalReports: 0, resolvedReports: 0, pendingReports: 0, inProgressReports: 0 }}
-        tasksData={tasks || []}
+        tasksData={[]} // We're passing an empty array but the component doesn't use it anymore
         recentReportsData={recentReports || []}
         nearbyReports={nearbyReports || []}
         categoriesData={{ categories: categories || [] }}

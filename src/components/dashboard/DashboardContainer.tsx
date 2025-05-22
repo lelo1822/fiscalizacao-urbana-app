@@ -4,7 +4,6 @@ import { DashboardStats, StatItem } from "@/types/dashboard";
 import StatisticsCharts from "./StatisticsCharts";
 import NearbyIssuesSection from "./NearbyIssuesSection";
 import RecentReportsSection from "./RecentReportsSection";
-import TasksSection from "./TasksSection";
 import { useNavigate } from "react-router-dom";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -54,10 +53,6 @@ const DashboardContainer = ({
             onViewDetails={handleViewDetails}
           />
         </div>
-        
-        <TasksSection 
-          tasks={tasksData || []}
-        />
       </div>
     </div>
   );
