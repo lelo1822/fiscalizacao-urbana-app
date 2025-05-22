@@ -17,8 +17,11 @@ const MapSection = ({ mapMarkers = [], userPosition, onMarkerClick }: MapSection
       </CardHeader>
       <CardContent className="flex flex-col items-center justify-center p-6 min-h-[320px]">
         <AlertCircle className="h-10 w-10 text-muted-foreground mb-3" />
-        <p className="text-muted-foreground text-center">
-          O recurso de mapa foi desativado nesta versão do aplicativo.
+        <p className="text-muted-foreground text-center mb-2">
+          Funcionalidade de mapa temporariamente desativada.
+        </p>
+        <p className="text-xs text-gray-500 text-center">
+          Estamos trabalhando para disponibilizar este recurso em breve.
         </p>
       </CardContent>
     </Card>

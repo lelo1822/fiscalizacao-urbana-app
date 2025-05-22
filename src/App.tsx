@@ -9,15 +9,16 @@ import Index from "./pages/Index";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 import Dashboard from "./pages/Dashboard";
-import MapPage from "./pages/Map";
+import NotFound from "./pages/NotFound";
 import ReportForm from "./pages/ReportForm";
 import ReportDetail from "./pages/ReportDetail";
 import ReportsList from "./pages/ReportsList";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import ProtectedRoute from "./components/ProtectedRoute";
-import NotFound from "./pages/NotFound";
 import FloatingActionButton from "./components/FloatingActionButton";
+
+// Note: Removed MapPage import since we're not using it now
 
 const queryClient = new QueryClient();
 
@@ -33,7 +34,7 @@ const App = () => (
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
-            <Route path="/map" element={<ProtectedRoute><MapPage /></ProtectedRoute>} />
+            {/* Removed the Map route to hide it completely */}
             <Route path="/reports" element={<ProtectedRoute><ReportsList /></ProtectedRoute>} />
             <Route path="/report/new" element={<ProtectedRoute><ReportForm /></ProtectedRoute>} />
             <Route path="/report/:id" element={<ProtectedRoute><ReportDetail /></ProtectedRoute>} />
