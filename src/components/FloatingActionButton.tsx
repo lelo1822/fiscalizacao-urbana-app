@@ -9,6 +9,7 @@ import {
   User,
   Settings,
   BarChart3,
+  FileText,
   Home 
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -36,17 +37,18 @@ const FloatingActionButton = ({ className }: FloatingActionButtonProps) => {
     { label: "Nova Ocorrência", icon: Camera, path: "/report/new", color: "bg-primary hover:bg-primary/90 text-white" },
     { label: "Mapa", icon: MapPin, path: "/map", color: "bg-secondary hover:bg-secondary/90 text-white" },
     { label: "Dashboard", icon: BarChart3, path: "/dashboard", color: "bg-[#8a4baf] hover:bg-[#7a3b9f] text-white" },
+    { label: "Ocorrências", icon: FileText, path: "/reports", color: "bg-[#6a11cb] hover:bg-[#5a01bb] text-white" },
     { label: "Perfil", icon: User, path: "/profile", color: "bg-[#9c6bbc] hover:bg-[#8c5bac] text-white" },
-    { label: "Configurações", icon: Settings, path: "/settings", color: "bg-[#6a11cb] hover:bg-[#5a01bb] text-white" },
+    { label: "Configurações", icon: Settings, path: "/settings", color: "bg-[#a66ad7] hover:bg-[#965ac7] text-white" },
   ];
 
-  // Não mostrar o FAB na página inicial
-  if (location.pathname === "/") {
+  // Não mostrar o FAB na página inicial ou em telas não mobile
+  if (location.pathname === "/" || window.innerWidth > 768) {
     return null;
   }
 
   return (
-    <div className={cn("fixed bottom-6 right-4 z-40 md:hidden", className)}>
+    <div className={cn("fixed bottom-6 right-4 z-40", className)}>
       {/* Menu Items */}
       <div 
         className={cn(

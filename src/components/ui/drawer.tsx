@@ -1,3 +1,4 @@
+
 import * as React from "react"
 import { Drawer as DrawerPrimitive } from "vaul"
 
@@ -52,6 +53,41 @@ const DrawerContent = React.forwardRef<
   </DrawerPortal>
 ))
 DrawerContent.displayName = "DrawerContent"
+
+// Enhanced height options for mobile
+const DrawerContentWithHeight = React.forwardRef<
+  React.ElementRef<typeof DrawerPrimitive.Content>,
+  React.ComponentPropsWithoutRef<typeof DrawerPrimitive.Content> & {
+    height?: "sm" | "md" | "lg" | "xl" | "full"
+  }
+>(({ className, height = "md", children, ...props }, ref) => {
+  const heightClasses = {
+    sm: "h-1/4",
+    md: "h-1/3", 
+    lg: "h-1/2",
+    xl: "h-3/4",
+    full: "h-[calc(100dvh-2rem)]"
+  }
+
+  return (
+    <DrawerPortal>
+      <DrawerOverlay />
+      <DrawerPrimitive.Content
+        ref={ref}
+        className={cn(
+          "fixed inset-x-0 bottom-0 z-50 mt-24 flex flex-col rounded-t-[10px] border bg-background",
+          heightClasses[height],
+          className
+        )}
+        {...props}
+      >
+        <div className="mx-auto mt-4 h-2 w-[100px] rounded-full bg-muted" />
+        {children}
+      </DrawerPrimitive.Content>
+    </DrawerPortal>
+  )
+})
+DrawerContentWithHeight.displayName = "DrawerContentWithHeight"
 
 const DrawerHeader = ({
   className,
@@ -109,6 +145,7 @@ export {
   DrawerTrigger,
   DrawerClose,
   DrawerContent,
+  DrawerContentWithHeight,
   DrawerHeader,
   DrawerFooter,
   DrawerTitle,

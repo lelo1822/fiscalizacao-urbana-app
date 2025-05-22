@@ -12,12 +12,12 @@ const Layout = ({ children }: LayoutProps) => {
   const location = useLocation();
   const isMobile = useIsMobile();
   
-  // Don't show sidebar on login and register pages
+  // Don't show sidebar on login, register, and index pages
   const hideSidebar = location.pathname === '/login' || location.pathname === '/register' || location.pathname === '/';
   
   return (
     <div className="flex min-h-screen w-full">
-      {!hideSidebar && <Sidebar />}
+      {!hideSidebar && !isMobile && <Sidebar />}
       <main className={`flex-1 ${isMobile ? "px-2 py-2" : "p-4"} overflow-x-hidden`}>
         {children}
       </main>
