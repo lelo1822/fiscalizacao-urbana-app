@@ -25,13 +25,19 @@ export class SupabaseReportService {
         type: report.type,
         description: report.description,
         address: report.address,
-        coordinates: report.coordinates,
+        coordinates: typeof report.coordinates === 'object' && report.coordinates !== null 
+          ? report.coordinates as { lat: number; lng: number }
+          : { lat: 0, lng: 0 },
         status: report.status,
         createdAt: report.created_at,
         updatedAt: report.updated_at,
         photos: report.photos || [],
-        complainant: report.complainant,
-        resolution: report.resolution,
+        complainant: typeof report.complainant === 'object' && report.complainant !== null
+          ? report.complainant as { fullName: string; phone: string; whatsapp?: string; address: string }
+          : { fullName: '', phone: '', address: '' },
+        resolution: typeof report.resolution === 'object' && report.resolution !== null
+          ? report.resolution as any
+          : undefined,
         agent: report.profiles ? {
           id: report.profiles.id,
           name: report.profiles.name,
@@ -72,13 +78,19 @@ export class SupabaseReportService {
         type: data.type,
         description: data.description,
         address: data.address,
-        coordinates: data.coordinates,
+        coordinates: typeof data.coordinates === 'object' && data.coordinates !== null 
+          ? data.coordinates as { lat: number; lng: number }
+          : { lat: 0, lng: 0 },
         status: data.status,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
         photos: data.photos || [],
-        complainant: data.complainant,
-        resolution: data.resolution,
+        complainant: typeof data.complainant === 'object' && data.complainant !== null
+          ? data.complainant as { fullName: string; phone: string; whatsapp?: string; address: string }
+          : { fullName: '', phone: '', address: '' },
+        resolution: typeof data.resolution === 'object' && data.resolution !== null
+          ? data.resolution as any
+          : undefined,
         agent: {
           id: user.id,
           name: 'Usuário',
@@ -152,13 +164,19 @@ export class SupabaseReportService {
         type: data.type,
         description: data.description,
         address: data.address,
-        coordinates: data.coordinates,
+        coordinates: typeof data.coordinates === 'object' && data.coordinates !== null 
+          ? data.coordinates as { lat: number; lng: number }
+          : { lat: 0, lng: 0 },
         status: data.status,
         createdAt: data.created_at,
         updatedAt: data.updated_at,
         photos: data.photos || [],
-        complainant: data.complainant,
-        resolution: data.resolution,
+        complainant: typeof data.complainant === 'object' && data.complainant !== null
+          ? data.complainant as { fullName: string; phone: string; whatsapp?: string; address: string }
+          : { fullName: '', phone: '', address: '' },
+        resolution: typeof data.resolution === 'object' && data.resolution !== null
+          ? data.resolution as any
+          : undefined,
         agent: data.profiles ? {
           id: data.profiles.id,
           name: data.profiles.name,

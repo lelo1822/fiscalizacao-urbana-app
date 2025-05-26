@@ -35,7 +35,15 @@ export const useSupabaseAuth = () => {
               .single();
             
             if (profile) {
-              setProfile(profile);
+              // Type cast to ensure role is properly typed
+              const typedProfile: UserProfile = {
+                id: profile.id,
+                name: profile.name,
+                email: profile.email,
+                role: profile.role as 'admin' | 'agent' | 'vereador',
+                gabinete_id: profile.gabinete_id
+              };
+              setProfile(typedProfile);
             }
           }, 0);
         } else {
