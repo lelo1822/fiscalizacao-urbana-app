@@ -9,7 +9,89 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          gabinete_id: string
+          id: string
+          name: string
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          gabinete_id: string
+          id: string
+          name: string
+          role?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          gabinete_id?: string
+          id?: string
+          name?: string
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      reports: {
+        Row: {
+          address: string
+          agent_id: string | null
+          complainant: Json
+          coordinates: Json
+          created_at: string
+          description: string
+          id: number
+          photos: string[] | null
+          resolution: Json | null
+          status: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          address: string
+          agent_id?: string | null
+          complainant: Json
+          coordinates?: Json
+          created_at?: string
+          description: string
+          id?: number
+          photos?: string[] | null
+          resolution?: Json | null
+          status?: string
+          type: string
+          updated_at?: string
+        }
+        Update: {
+          address?: string
+          agent_id?: string | null
+          complainant?: Json
+          coordinates?: Json
+          created_at?: string
+          description?: string
+          id?: number
+          photos?: string[] | null
+          resolution?: Json | null
+          status?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reports_agent_id_fkey"
+            columns: ["agent_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never

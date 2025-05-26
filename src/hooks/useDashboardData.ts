@@ -1,8 +1,9 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { getStats, mockDailyTasks, getRecentReports, mockReportCategories } from "@/data/dashboardMockData";
+import { getStats, mockDailyTasks, mockReportCategories } from "@/data/dashboardMockData";
 import { Report, WeatherInfo, Task, Category, StatItem, DashboardStats } from "@/types/dashboard";
+import { SupabaseReportService } from "@/services/supabaseReportService";
 import useWeather from "./useWeather";
 
 export const useDashboardData = () => {
@@ -36,31 +37,26 @@ export const useDashboardData = () => {
   }
 
   useEffect(() => {
-    // Simulate fetching data from API
-    const fetchDashboardData = () => {
+    const fetchDashboardData = async () => {
       try {
-        // Get stats data
-        const statsData = getStats();
-        setStats(statsData);
-
-        // Get tasks data
-        setTasks(mockDailyTasks || []);
-
-        // Get recent reports
-        const recentReportsData = getRecentReports();
-        setRecentReports(recentReportsData || []);
+        setLoading(true);
         
-        // Get nearby reports (using a subset of recent reports for now)
-        setNearbyReports(recentReportsData?.slice(0, 3) || []);
-
-        // Get categories
-        setCategories(mockReportCategories || []);
+        // Buscar relatórios do Supabase
+        const allReports = await SupabaseReportService.getAllReports();
         
-        // Calculate dashboard stats
-        const totalReports = recentReportsData?.length || 0;
-        const resolvedReports = recentReportsData?.filter(r => r.status === 'Resolvido').length || 0;
-        const pendingReports = recentReportsData?.filter(r => r.status === 'Pendente').length || 0;
-        const inProgressReports = recentReportsData?.filter(r => r.status === 'Em andamento').length || 0;
+        // Filtrar relatórios por gabinete se o usuário não for admin
+        const userReports = user?.gabineteId && user.role !== 'admin'
+          ? allReports.filter(report => report.agent?.gabineteId === user.gabineteId)
+          : allReports;
+
+        setRecentReports(userReports);
+        setNearbyReports(userReports.slice(0, 3));
+
+        // Calcular estatísticas baseadas nos dados reais
+        const totalReports = userReports.length;
+        const resolvedReports = userReports.filter(r => r.status === 'Resolvido').length;
+        const pendingReports = userReports.filter(r => r.status === 'Pendente').length;
+        const inProgressReports = userReports.filter(r => r.status === 'Em andamento').length;
         
         setDashboardStats({
           totalReports,
@@ -69,16 +65,52 @@ export const useDashboardData = () => {
           inProgressReports
         });
 
+        // Atualizar stats com dados reais
+        const statsData = [
+          {
+            label: "Total de Relatórios",
+            value: totalReports,
+            trend: "up" as const,
+            percent: 12
+          },
+          {
+            label: "Resolvidos",
+            value: resolvedReports,
+            trend: "up" as const,
+            percent: 8
+          },
+          {
+            label: "Pendentes",
+            value: pendingReports,
+            trend: "neutral" as const,
+            percent: 0
+          },
+          {
+            label: "Em Andamento",
+            value: inProgressReports,
+            trend: "up" as const,
+            percent: 5
+          }
+        ];
+        
+        setStats(statsData);
+
+        // Manter dados mock para outras funcionalidades
+        setTasks(mockDailyTasks || []);
+        setCategories(mockReportCategories || []);
+        
         setLoading(false);
       } catch (e) {
-        console.error("Error fetching dashboard data:", e);
+        console.error("Erro ao carregar dados do dashboard:", e);
         setError("Ocorreu um erro ao carregar os dados do dashboard");
         setLoading(false);
       }
     };
 
-    fetchDashboardData();
-  }, []);
+    if (user) {
+      fetchDashboardData();
+    }
+  }, [user]);
 
   return {
     greeting,

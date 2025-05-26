@@ -5,7 +5,7 @@ import { toast } from "@/hooks/use-toast";
 import { Complainant } from "@/types/complainant";
 import { FormErrors } from "@/types/form";
 import { useAuth } from "../context/AuthContext";
-import { addReport } from "@/services/reportService";
+import { SupabaseReportService } from "@/services/supabaseReportService";
 
 interface LocationState {
   category?: string;
@@ -134,7 +134,6 @@ export const useReportForm = () => {
         address: address,
         coordinates: coordinates || { lat: 0, lng: 0 },
         status: "Pendente",
-        createdAt: new Date().toISOString(),
         complainant: complainant,
         photos: photos,
         agent: user ? {
@@ -144,14 +143,18 @@ export const useReportForm = () => {
         } : undefined
       };
       
-      // Adicionar o relatório usando o serviço
-      addReport(newReport);
+      // Adicionar o relatório usando o serviço do Supabase
+      const result = await SupabaseReportService.createReport(newReport);
       
-      toast({
-        title: "Sucesso",
-        description: "Ocorrência registrada com sucesso!"
-      });
-      navigate("/dashboard");
+      if (result) {
+        toast({
+          title: "Sucesso",
+          description: "Ocorrência registrada com sucesso!"
+        });
+        navigate("/dashboard");
+      } else {
+        throw new Error("Erro ao salvar no banco de dados");
+      }
     } catch (error) {
       console.error("Erro ao enviar ocorrência:", error);
       toast({
