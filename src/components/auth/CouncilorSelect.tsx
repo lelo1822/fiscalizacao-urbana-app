@@ -55,7 +55,7 @@ const CouncilorSelect = ({ selectedGabineteId, onChange, formError }: CouncilorS
         <p className="text-destructive text-xs mb-2">{formError}</p>
       )}
       
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-[400px] overflow-y-auto p-1">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[400px] overflow-y-auto p-1">
         {VEREADORES.map((vereador) => {
           const isSelected = selectedGabineteId === vereador.id;
           
@@ -69,7 +69,7 @@ const CouncilorSelect = ({ selectedGabineteId, onChange, formError }: CouncilorS
             >
               <div className="flex flex-col items-center gap-2">
                 <div className="relative">
-                  <div className="w-20 h-24 border-2 border-muted rounded-lg overflow-hidden bg-gray-100">
+                  <div className="w-16 h-20 border-2 border-muted rounded overflow-hidden bg-gray-100">
                     <img 
                       src={vereador.imageUrl} 
                       alt={vereador.nome}
@@ -83,7 +83,7 @@ const CouncilorSelect = ({ selectedGabineteId, onChange, formError }: CouncilorS
                   )}
                 </div>
                 <div className="text-center">
-                  <p className="text-sm font-medium line-clamp-1">{vereador.nome}</p>
+                  <p className="text-sm font-medium">{vereador.nome}</p>
                   <p className="text-xs text-muted-foreground">{vereador.partido}</p>
                 </div>
               </div>
