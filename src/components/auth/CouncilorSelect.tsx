@@ -69,11 +69,11 @@ const CouncilorSelect = ({ selectedGabineteId, onChange, formError }: CouncilorS
             >
               <div className="flex flex-col items-center gap-2">
                 <div className="relative">
-                  <div className="w-20 h-24 border-2 border-muted rounded-lg overflow-hidden bg-gray-100">
+                  <div className="w-16 h-20 border-2 border-muted rounded overflow-hidden bg-gray-100">
                     <img 
                       src={vereador.imageUrl} 
                       alt={vereador.nome}
-                      className="w-full h-full object-cover" 
+                      className="w-full h-full object-contain" 
                     />
                   </div>
                   {isSelected && (
