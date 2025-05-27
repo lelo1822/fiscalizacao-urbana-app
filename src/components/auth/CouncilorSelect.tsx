@@ -62,21 +62,20 @@ const CouncilorSelect = ({ selectedGabineteId, onChange, formError }: CouncilorS
           return (
             <Card 
               key={vereador.id}
-              className={`p-2 cursor-pointer hover:bg-accent/50 transition-colors ${
+              className={`p-3 cursor-pointer hover:bg-accent/50 transition-colors ${
                 isSelected ? 'bg-primary/10 border-primary' : ''
               }`}
               onClick={() => onChange(vereador.id)}
             >
               <div className="flex flex-col items-center gap-2">
                 <div className="relative">
-                  <Avatar className="h-20 w-20 border-2 border-muted">
-                    <AvatarImage 
+                  <div className="w-20 h-24 border-2 border-muted rounded-lg overflow-hidden bg-gray-100">
+                    <img 
                       src={vereador.imageUrl} 
                       alt={vereador.nome}
-                      className="object-cover" 
+                      className="w-full h-full object-cover" 
                     />
-                    <AvatarFallback>{vereador.nome.charAt(0)}</AvatarFallback>
-                  </Avatar>
+                  </div>
                   {isSelected && (
                     <div className="absolute -top-1 -right-1 bg-primary text-white rounded-full p-1">
                       <Check className="h-3 w-3" />
