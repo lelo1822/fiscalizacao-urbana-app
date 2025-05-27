@@ -10,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
 import CouncilorSelect from '@/components/auth/CouncilorSelect';
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, CheckCircle, Clock } from "lucide-react";
+import { AlertCircle, CheckCircle, Clock, RefreshCw } from "lucide-react";
 
 const Auth = () => {
   const { signIn, signUp, loading, isAuthenticated } = useSupabaseAuth();
@@ -53,11 +53,13 @@ const Auth = () => {
     const result = await signIn(loginEmail, loginPassword);
     if (!result.success) {
       if (result.error?.message === 'Email not confirmed') {
-        setFormError('Você precisa confirmar seu email antes de fazer login. Verifique sua caixa de entrada e spam.');
+        setFormError('⚠️ Você precisa confirmar seu email antes de fazer login. Verifique sua caixa de entrada e pasta de spam. Se não recebeu o email, tente fazer um novo cadastro.');
       } else if (result.error?.message === 'Invalid login credentials') {
-        setFormError('Email ou senha incorretos. Verifique suas credenciais.');
+        setFormError('❌ Email ou senha incorretos. Verifique suas credenciais ou tente fazer um novo cadastro se ainda não tem conta.');
+      } else if (result.error?.message?.includes('rate_limit')) {
+        setFormError('⏰ Muitas tentativas de login. Aguarde alguns minutos antes de tentar novamente.');
       } else {
-        setFormError('Erro ao fazer login. Tente novamente em alguns minutos.');
+        setFormError('🔧 Erro ao fazer login. Tente novamente em alguns minutos ou entre em contato com o suporte.');
       }
     }
     setIsSubmitting(false);
@@ -80,20 +82,39 @@ const Auth = () => {
       setIsSubmitting(false);
       return;
     }
+
+    // Validação de email
+    if (!signupEmail.includes('@')) {
+      setFormError('Por favor, insira um email válido.');
+      setIsSubmitting(false);
+      return;
+    }
     
     const result = await signUp(signupEmail, signupPassword, signupName, signupRole, signupGabinete);
     if (!result.success) {
       if (result.error?.message?.includes('rate_limit')) {
-        setFormError('Muitas tentativas de cadastro. Aguarde alguns minutos antes de tentar novamente.');
-      } else if (result.error?.message?.includes('already_registered')) {
-        setFormError('Este email já está cadastrado. Tente fazer login ou use outro email.');
+        setFormError('⏰ Limite de tentativas excedido. Aguarde alguns minutos antes de tentar novamente. Se você já tem uma conta, tente fazer login.');
+      } else if (result.error?.message?.includes('already_registered') || result.error?.message?.includes('already been registered')) {
+        setFormError('📧 Este email já está cadastrado. Tente fazer login ou use outro email.');
+      } else if (result.error?.message?.includes('signup_disabled')) {
+        setFormError('🚫 Cadastros temporariamente desabilitados. Tente novamente mais tarde.');
       } else {
-        setFormError('Erro ao criar conta. Verifique os dados e tente novamente.');
+        setFormError('❌ Erro ao criar conta. Verifique se o email está correto e tente novamente. Se o problema persistir, use outro email.');
       }
     } else {
-      setSuccessMessage('Cadastro realizado! Verifique seu email para confirmar a conta antes de fazer login.');
+      setSuccessMessage('✅ Cadastro realizado com sucesso! Verifique seu email para confirmar a conta antes de fazer login. Pode levar alguns minutos para chegar.');
+      // Limpar formulário após sucesso
+      setSignupName('');
+      setSignupEmail('');
+      setSignupPassword('');
+      setSignupGabinete('1');
     }
     setIsSubmitting(false);
+  };
+
+  const clearMessages = () => {
+    setFormError('');
+    setSuccessMessage('');
   };
 
   return (
@@ -118,6 +139,15 @@ const Auth = () => {
               <Alert variant="destructive" className="mb-4">
                 <AlertCircle className="h-4 w-4" />
                 <AlertDescription>{formError}</AlertDescription>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="mt-2 h-6 px-2"
+                  onClick={clearMessages}
+                >
+                  <RefreshCw className="h-3 w-3 mr-1" />
+                  Tentar novamente
+                </Button>
               </Alert>
             )}
             
@@ -130,8 +160,8 @@ const Auth = () => {
 
             <Tabs defaultValue="login" className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="login">Entrar</TabsTrigger>
-                <TabsTrigger value="signup">Cadastrar</TabsTrigger>
+                <TabsTrigger value="login" onClick={clearMessages}>Entrar</TabsTrigger>
+                <TabsTrigger value="signup" onClick={clearMessages}>Cadastrar</TabsTrigger>
               </TabsList>
               
               <TabsContent value="login" className="space-y-4">
@@ -145,6 +175,7 @@ const Auth = () => {
                       value={loginEmail}
                       onChange={(e) => setLoginEmail(e.target.value)}
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
                   <div className="space-y-2">
@@ -155,6 +186,7 @@ const Auth = () => {
                       value={loginPassword}
                       onChange={(e) => setLoginPassword(e.target.value)}
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={isSubmitting}>
@@ -162,9 +194,13 @@ const Auth = () => {
                   </Button>
                 </form>
                 
-                <div className="text-center text-sm text-muted-foreground">
-                  <p>Problemas para acessar?</p>
-                  <p>Verifique se confirmou seu email na caixa de entrada.</p>
+                <div className="text-center text-sm text-muted-foreground space-y-2">
+                  <p>💡 <strong>Problemas para acessar?</strong></p>
+                  <div className="text-xs space-y-1">
+                    <p>• Verifique se confirmou seu email na caixa de entrada</p>
+                    <p>• Se não tem conta, use a aba "Cadastrar"</p>
+                    <p>• Se esqueceu a senha, faça um novo cadastro</p>
+                  </div>
                 </div>
               </TabsContent>
               
@@ -179,6 +215,7 @@ const Auth = () => {
                       value={signupName}
                       onChange={(e) => setSignupName(e.target.value)}
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
                   <div className="space-y-2">
@@ -190,6 +227,7 @@ const Auth = () => {
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
                       required
+                      disabled={isSubmitting}
                     />
                   </div>
                   <div className="space-y-2">
@@ -202,11 +240,16 @@ const Auth = () => {
                       onChange={(e) => setSignupPassword(e.target.value)}
                       required
                       minLength={6}
+                      disabled={isSubmitting}
                     />
                   </div>
                   <div className="space-y-2">
                     <Label htmlFor="role">Função</Label>
-                    <Select value={signupRole} onValueChange={(value: 'agent' | 'vereador') => setSignupRole(value)}>
+                    <Select 
+                      value={signupRole} 
+                      onValueChange={(value: 'agent' | 'vereador') => setSignupRole(value)}
+                      disabled={isSubmitting}
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione sua função" />
                       </SelectTrigger>
@@ -231,8 +274,8 @@ const Auth = () => {
                 <Alert className="border-blue-200 bg-blue-50">
                   <Clock className="h-4 w-4 text-blue-600" />
                   <AlertDescription className="text-blue-700">
-                    Após o cadastro, você receberá um email de confirmação. 
-                    Confirme seu email antes de tentar fazer login.
+                    <strong>📧 Importante:</strong> Após o cadastro, você receberá um email de confirmação. 
+                    Confirme seu email antes de tentar fazer login. O email pode demorar alguns minutos para chegar.
                   </AlertDescription>
                 </Alert>
               </TabsContent>
