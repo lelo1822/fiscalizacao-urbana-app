@@ -32,7 +32,7 @@ const Sidebar = () => {
 
   // Get councilor name based on gabineteId
   const getCouncilorName = () => {
-    // Import the same vereadores data used in CouncilorSelect
+    // Lista completa dos vereadores (igual ao CouncilorSelect)
     const VEREADORES = [
       { id: "1", nome: "Alexandre Capriotti" },
       { id: "2", nome: "Carmônio Bastos" },

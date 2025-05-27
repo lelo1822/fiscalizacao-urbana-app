@@ -8,7 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useSupabaseAuth } from '@/hooks/useSupabaseAuth';
-import { GABINETES } from '@/context/AuthContext';
+import CouncilorSelect from '@/components/auth/CouncilorSelect';
 
 const Auth = () => {
   const { signIn, signUp, loading, isAuthenticated } = useSupabaseAuth();
@@ -24,6 +24,7 @@ const Auth = () => {
   const [signupPassword, setSignupPassword] = useState('');
   const [signupRole, setSignupRole] = useState<'agent' | 'vereador'>('agent');
   const [signupGabinete, setSignupGabinete] = useState('1');
+  const [formError, setFormError] = useState('');
 
   if (isAuthenticated) {
     return <Navigate to="/dashboard" replace />;
@@ -43,14 +44,30 @@ const Auth = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await signIn(loginEmail, loginPassword);
+    setFormError('');
+    
+    const result = await signIn(loginEmail, loginPassword);
+    if (!result.success) {
+      setFormError('Erro ao fazer login. Verifique suas credenciais.');
+    }
     setIsSubmitting(false);
   };
 
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    await signUp(signupEmail, signupPassword, signupName, signupRole, signupGabinete);
+    setFormError('');
+    
+    if (!signupGabinete) {
+      setFormError('Por favor, selecione um vereador.');
+      setIsSubmitting(false);
+      return;
+    }
+    
+    const result = await signUp(signupEmail, signupPassword, signupName, signupRole, signupGabinete);
+    if (!result.success) {
+      setFormError('Erro ao criar conta. Tente novamente.');
+    }
     setIsSubmitting(false);
   };
 
@@ -80,6 +97,12 @@ const Auth = () => {
               
               <TabsContent value="login" className="space-y-4">
                 <form onSubmit={handleLogin} className="space-y-4">
+                  {formError && (
+                    <div className="text-destructive text-sm bg-destructive/10 p-2 rounded">
+                      {formError}
+                    </div>
+                  )}
+                  
                   <div className="space-y-2">
                     <Label htmlFor="email">Email</Label>
                     <Input
@@ -109,6 +132,12 @@ const Auth = () => {
               
               <TabsContent value="signup" className="space-y-4">
                 <form onSubmit={handleSignup} className="space-y-4">
+                  {formError && (
+                    <div className="text-destructive text-sm bg-destructive/10 p-2 rounded">
+                      {formError}
+                    </div>
+                  )}
+                  
                   <div className="space-y-2">
                     <Label htmlFor="signup-name">Nome Completo</Label>
                     <Input
@@ -155,21 +184,13 @@ const Auth = () => {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="gabinete">Gabinete</Label>
-                    <Select value={signupGabinete} onValueChange={setSignupGabinete}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione o gabinete" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {GABINETES.map((gabinete) => (
-                          <SelectItem key={gabinete.id} value={gabinete.id}>
-                            {gabinete.nome}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                  
+                  <CouncilorSelect 
+                    selectedGabineteId={signupGabinete}
+                    onChange={setSignupGabinete}
+                    formError=""
+                  />
+                  
                   <Button type="submit" className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? "Cadastrando..." : "Cadastrar"}
                   </Button>
